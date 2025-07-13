@@ -35,6 +35,7 @@ IMG_HEIGHT = 80
 IMG_WIDTH = 200
 NUM_CLASSES = 10
 NUM_DIGITS = 5
+PATIENCE = 5
 
 # 디렉토리 생성
 os.makedirs(CHECKPOINT_DIR, exist_ok=True)
@@ -81,10 +82,9 @@ def main():
     model = CaptchaNet().to(DEVICE)
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 
     best_acc = 0.0
-    patience = 3
     patience_counter = 0
     for epoch in range(EPOCHS):
         model.train()
@@ -116,8 +116,8 @@ def main():
             patience_counter = 0
         else:
             patience_counter += 1
-            if patience_counter >= patience:
-                print(f"Early stopping at epoch {epoch} (no improvement for {patience} epochs)")
+            if patience_counter >= PATIENCE:
+                print(f"Early stopping at epoch {epoch} (no improvement for {PATIENCE} epochs)")
                 writer.add_scalar("Accuracy/final_test", acc, epoch)
                 torch.save(model.state_dict(), os.path.join(CHECKPOINT_DIR, "captcha_final.pt"))
                 print(f"Training finished. Final test acc: {acc:.4f}")

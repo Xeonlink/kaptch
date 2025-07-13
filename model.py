@@ -71,21 +71,25 @@ class CaptchaNet(nn.Module):
     def __init__(self):
         super().__init__()
         # Encoder
-        self.enc1 = UNetBlock(4, 32)
+        self.conv1 = nn.Conv2d(4, 128, kernel_size=3, padding=1)
         self.pool1 = nn.MaxPool2d(2)
-        self.enc2 = UNetBlock(32, 64)
+        self.conv2 = nn.Conv2d(128, 64, kernel_size=3, padding=1)
         self.pool2 = nn.MaxPool2d(2)
+        # self.enc1 = UNetBlock(4, 32)
+        # self.pool1 = nn.MaxPool2d(2)
+        # self.enc2 = UNetBlock(32, 64)
+        # self.pool2 = nn.MaxPool2d(2)
         # Bottleneck
-        self.bottleneck = UNetBlock(64, 128)
+        # self.bottleneck = UNetBlock(64, 128)
         # Decoder
-        self.up2 = nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2)
-        self.dec2 = UNetBlock(128, 64)
-        self.up1 = nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2)
-        self.dec1 = UNetBlock(64, 32)
+        # self.up2 = nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2)
+        # self.dec2 = UNetBlock(128, 64)
+        # self.up1 = nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2)
+        # self.dec1 = UNetBlock(64, 32)
         # Feature aggregation
-        # self.dropout = nn.Dropout(0.25)
+        self.dropout = nn.Dropout(0.25)
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(32 * 64 * 256, 5 * 10)
+        self.fc = nn.Linear(64 * 16 * 64, 5 * 10)
 
     @staticmethod
     def preprocess_image(img: torch.Tensor) -> torch.Tensor:
@@ -113,20 +117,22 @@ class CaptchaNet(nn.Module):
         x = F.pad(x, (0, target_W - W, 0, target_H - H), mode="reflect")
 
         # Encoder
-        e1 = self.enc1(x)  # (B, 32, H, W)
-        p1 = self.pool1(e1)  # (B, 32, H/2, W/2)
-        e2 = self.enc2(p1)  # (B, 64, H/2, W/2)
-        p2 = self.pool2(e2)  # (B, 64, H/4, W/4)
+        x = self.conv1(x)  # (B, 32, H, W)
+        x = F.relu(x)
+        x = self.pool1(x)  # (B, 32, H/2, W/2)
+        x = self.conv2(x)  # (B, 64, H/2, W/2)
+        x = F.relu(x)
+        x = self.pool2(x)  # (B, 64, H/4, W/4)
         # Bottleneck
-        b = self.bottleneck(p2)  # (B, 128, H/4, W/4)
+        # b = self.bottleneck(p2)  # (B, 128, H/4, W/4)
         # Decoder
-        u2 = self.up2(b)  # (B, 64, H/2, W/2)
-        d2 = self.dec2(torch.cat([u2, e2], dim=1))  # (B, 64, H/2, W/2)
-        u1 = self.up1(d2)  # (B, 32, H, W)
-        d1 = self.dec1(torch.cat([u1, e1], dim=1))  # (B, 32, H, W)
+        # u2 = self.up2(b)  # (B, 64, H/2, W/2)
+        # d2 = self.dec2(torch.cat([u2, e2], dim=1))  # (B, 64, H/2, W/2)
+        # u1 = self.up1(d2)  # (B, 32, H, W)
+        # d1 = self.dec1(torch.cat([u1, e1], dim=1))  # (B, 32, H, W)
         # Feature aggregation
-        # x = self.dropout(d1)  # (B, 32, H, W)
-        x = self.flatten(d1)  # (B, 32*H*W)
+        x = self.dropout(x)  # (B, 64, H/4, W/4)
+        x = self.flatten(x)  # (B, 64*H/4*W/4)
         x = self.fc(x)  # (B, 5*10)
         x = x.view(-1, 5, 10)  # (B, 5, 10)
         return x
