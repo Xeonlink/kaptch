@@ -3,44 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def preprocess1(img: torch.Tensor) -> torch.Tensor:
-    """
-    Parameters:
-        img (torch.Tensor): (W, H, 4) 또는 (batch, W, H, 4)
-    Returns:
-        torch.Tensor: (batch, 1, H, W) (grayscale)
-    """
-    if img.ndim == 3:
-        img = img.unsqueeze(0)  # (H, W, 4) -> (1, H, W, 4)
-
-    mask = img[:, :, :, 3] < 255
-    img[mask] = torch.tensor([255, 255, 255, 255], device=img.device, dtype=torch.uint8)
-    img = img[:, :, :, :3]  # (1, H, W, 4) -> (1, H, W, 3)
-    img = img.float()
-    img = img.mean(dim=3, keepdim=True)  # (1, H, W, 3) -> (1, H, W, 1)
-    img = img / 255.0
-    img = img.permute(0, 3, 1, 2)  # (1, H, W, 1) -> (1, 1, H, W)
-    return img
-
-
-def preprocess2(img: torch.Tensor) -> torch.Tensor:
-    """
-    Parameters:
-        img (torch.Tensor): (W, H, 4) 또는 (batch, W, H, 4)
-    Returns:
-        torch.Tensor: (batch, 4, H, W) (rgba)
-    """
-    if img.ndim == 3:
-        img = img.unsqueeze(0)  # (W, H, 4) -> (1, W, H, 4)
-
-    img = img.permute(0, 3, 2, 1)  # (1, W, H, 4) -> (1, 4, H, W)
-    # uint8 -> float32
-    img = img.float()
-    # normalize to [0, 1]
-    img = img / 255.0
-    return img
-
-
 class CaptchaNet(nn.Module):
     """
     캡챠 숫자 5자리를 예측하는 U-Net 기반 CNN 모델.
@@ -71,32 +33,37 @@ class CaptchaNet(nn.Module):
 
         self.dropout = nn.Dropout(0.5)
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(16 * 8 * 32, 5 * 10)
+        self.fc = nn.Linear(16 * 8 * 20, 5 * 10)
 
-    @staticmethod
-    def preprocess_image(img: torch.Tensor) -> torch.Tensor:
-        return preprocess2(img)
-
-    def forward(self, x: torch.Tensor, train: bool = True) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Parameters:
-            x (torch.Tensor): (W, H, 4) 또는 (batch, W, H, 4)
+            x (torch.Tensor): (batch, 4, H, W), 0~255
         Returns:
-            torch.Tensor: (batch, 5, 10)
+            torch.Tensor: (batch, 5, 10) or list[str]
         """
-        x = self.preprocess_image(x)
+        x = x.float() / 255.0
+
+        # 입력 이미지의 H, W가 32의 배수가 되도록 padding 추가
+        B, C, H, W = x.shape
+        ph = ((H - 1) // 32 + 1) * 32
+        pw = ((W - 1) // 32 + 1) * 32
+        padding = (0, pw - W, 0, ph - H)
+        x = F.pad(x, padding)
 
         # 입력 이미지의 H, W가 2의 제곱수가 되도록 crop
         # B, C, H, W = x.shape
         # target_H = 1 if H == 0 else 2 ** ((H - 1).bit_length() - 1)
         # target_W = 1 if W == 0 else 2 ** ((W - 1).bit_length() - 1)
-        # x = x[:, :, :target_H, :target_W]
+        # shrink_H = (H - target_H) // 2
+        # shrink_W = (W - target_W) // 2
+        # x = x[:, :, shrink_H : shrink_H + target_H, shrink_W : shrink_W + target_W]
 
         # 입력 이미지의 H, W가 2의 제곱수가 되도록 reflection padding 추가
-        B, C, H, W = x.shape
-        target_H = 1 if H == 0 else 2 ** (H - 1).bit_length()
-        target_W = 1 if W == 0 else 2 ** (W - 1).bit_length()
-        x = F.pad(x, (0, target_W - W, 0, target_H - H))
+        # B, C, H, W = x.shape
+        # target_H = 1 if H == 0 else 2 ** (H - 1).bit_length()
+        # target_W = 1 if W == 0 else 2 ** (W - 1).bit_length()
+        # x = F.pad(x, (0, target_W - W, 0, target_H - H))
 
         x = self.block1(x)
         x = self.block2(x)
@@ -107,10 +74,5 @@ class CaptchaNet(nn.Module):
         x = self.flatten(x)  # (B, 32*H/2*W/2)
         x = self.fc(x)  # (B, 5*10)
         x = x.view(-1, 5, 10)  # (B, 5, 10)
-
-        if not train:
-            preds: list[list[int]] = x.argmax(dim=2).tolist()
-            preds = ["".join(map(str, pred)) for pred in preds]
-            return preds
 
         return x

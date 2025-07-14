@@ -19,7 +19,7 @@ def load_model(model_path: str) -> CaptchaNet:
 
 
 def main():
-    model = load_model("checkpoints/captcha_final.pt")
+    model = load_model("checkpoints/captcha_ep40.pkl")
     for i in range(10):
         image_path = f"demo/{i:04d}.png"
         image = load_image(image_path)
