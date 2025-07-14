@@ -25,7 +25,7 @@ def get_device() -> torch.device:
 
 # 하이퍼파라미터
 BATCH_SIZE = 64
-EPOCHS = 30
+EPOCHS = 50
 LEARNING_RATE = 1e-3
 CHECKPOINT_DIR = "checkpoints"
 LOG_DIR = "logs"
@@ -82,7 +82,7 @@ def main():
     model = CaptchaNet().to(DEVICE)
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
 
     best_acc = 0.0
     patience_counter = 0
@@ -100,7 +100,7 @@ def main():
             optimizer.step()
 
             writer.add_scalar("Loss/train", loss.item(), epoch * len(train_loader) + batch_idx)
-        scheduler.step()
+        # scheduler.step()
 
         acc = evaluate(model, test_loader, DEVICE)
         writer.add_scalar("Accuracy/test", acc, epoch)
@@ -111,7 +111,7 @@ def main():
         print(f"[Epoch {epoch}] test_acc={acc:.4f}, checkpoint saved: {ckpt_path}")
 
         # Early stopping logic
-        if acc > best_acc:
+        if acc >= best_acc:
             best_acc = acc
             patience_counter = 0
         else:
