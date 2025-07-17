@@ -1,3 +1,13 @@
+"""
+한국모바일인증 데이터셋 생성 스크립트
+
+참고: https://github.com/k-cert/captcha-dataset/tree/main/dataset/kmcert
+
+데이터셋 구조:
+- dataset/kmcert/train/0000/0000.png
+- dataset/kmcert/test/0000/0000.png
+"""
+
 from collections.abc import Awaitable
 import numpy as np
 import aiofiles
@@ -29,8 +39,10 @@ async def __download_image(session: aiohttp.ClientSession, url: str) -> np.ndarr
     Returns:
         np.ndarray: 디코딩된 이미지 배열
     """
+
     async with session.get(url) as resp:
         data: bytes = await resp.read()
+        print(data)
         image: np.ndarray = np.frombuffer(data, np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
         return image
@@ -83,7 +95,7 @@ async def __build_dataset(train_image_count: int, test_image_count: int) -> None
         None
     """
     current_dir: str = os.path.dirname(__file__)
-    dataset_dir: str = os.path.join(current_dir, "dataset")
+    dataset_dir: str = os.path.join(current_dir, "dataset2")
     train_dir: str = os.path.join(dataset_dir, "train")
     test_dir: str = os.path.join(dataset_dir, "test")
 

@@ -1,5 +1,5 @@
 [project]
-name = "chaptcha-breaker"
+name = "captcha-breaker"
 version = "0.1.0"
 description = "한국의 모바일인증 캡챠를 뚫는 프로젝트"
 readme = "README.md"
@@ -12,6 +12,7 @@ dependencies = [
     "onnx>=1.18.0",
     "onnxruntime>=1.22.1",
     "opencv-python>=4.12.0.88",
+    "playwright>=1.53.0",
     "requests>=2.32.4",
     "tensorboard>=2.19.0",
     "torch>=2.7.1",

@@ -23,7 +23,7 @@ def main():
     script_module = torch.jit.script(model)
 
     mock_input = load_image("demo/0000.png")
-    mock_input = mock_input.permute(2, 1, 0).unsqueeze(0).float()
+    mock_input = mock_input.permute(2, 1, 0).unsqueeze(0).float() / 255.0
 
     torch.onnx.export(
         model=script_module,

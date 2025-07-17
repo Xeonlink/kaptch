@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset Labeling Tool</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Dataset Labeling Tool</h1>
+        <div style="margin-bottom: 12px;">
+            <label for="dataset-select">Dataset 선택: </label>
+            <select id="dataset-select"></select>
+        </div>
+        <div id="step">CSV 파일을 선택하세요.</div>
+        <div id="progress"></div>
+        <img id="image-preview" src="" alt="Preview" style="display:none;" />
+        <input type="text" id="label-input" placeholder="라벨을 입력하세요" autocomplete="off" style="display:none;" />
+        <div class="controls">
+            <button id="prev-btn" disabled>이전</button>
+            <button id="next-btn" disabled>다음</button>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

@@ -38,11 +38,10 @@ class CaptchaNet(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Parameters:
-            x (torch.Tensor): (batch, 4, H, W), 0~255
+            x (torch.Tensor): (batch, 4, H, W), 0~1, float32
         Returns:
             torch.Tensor: (batch, 5, 10) or list[str]
         """
-        x = x.float() / 255.0
 
         # 입력 이미지의 H, W가 32의 배수가 되도록 padding 추가
         B, C, H, W = x.shape

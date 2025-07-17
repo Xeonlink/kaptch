@@ -1,0 +1,50 @@
+:root {
+    --bg-primary: #f7f7f7;
+    --bg-secondary: #fff;
+    --bg-tertiary: #f0f0f0;
+    --bg-quaternary: #eee;
+    --text-primary: #333;
+    --text-secondary: #666;
+    --text-tertiary: #888;
+    --text-placeholder: #999;
+    --text-disabled: #aaa;
+    --border-primary: #ccc;
+    --border-secondary: #bbb;
+    --shadow: rgba(0,0,0,0.1);
+    --button-hover: #e6e6e6;
+    --button-disabled: #eee;
+    --input-bg: #fff;
+    --select-bg: #fff;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-tertiary: #404040;
+        --bg-quaternary: #1a1a1a;
+        --text-primary: #e0e0e0;
+        --text-secondary: #ccc;
+        --text-tertiary: #bbb;
+        --text-placeholder: #aaa;
+        --text-disabled: #666;
+        --border-primary: #555;
+        --border-secondary: #555;
+        --shadow: rgba(0,0,0,0.3);
+        --button-hover: #4a4a4a;
+        --button-disabled: #2a2a2a;
+        --input-bg: #404040;
+        --select-bg: #404040;
+    }
+}
+body { font-family: sans-serif; background: var(--bg-primary); margin: 0; padding: 0; color: var(--text-primary); }
+.container { max-width: 520px; margin: 40px auto; background: var(--bg-secondary); border-radius: 8px; box-shadow: 0 2px 8px var(--shadow); padding: 24px; }
+h1 { font-size: 1.5em; margin-bottom: 16px; color: var(--text-primary); }
+#image-preview { display: block; margin: 0 auto 16px auto; max-width: 100%; max-height: 240px; border: 1px solid var(--border-primary); background: white; }
+.controls { display: flex; gap: 8px; margin-bottom: 12px; }
+.controls button { flex: 1; padding: 8px 0; font-size: 1em; border-radius: 4px; border: 1px solid var(--border-secondary); background: var(--bg-tertiary); color: var(--text-primary); cursor: pointer; }
+.controls button:hover { background: var(--button-hover); }
+.controls button:disabled { background: var(--button-disabled); color: var(--text-disabled); cursor: not-allowed; }
+#label-input { width: 100%; font-size: 1.1em; padding: 8px; margin-bottom: 12px; border-radius: 4px; border: 1px solid var(--border-secondary); background: var(--input-bg); color: var(--text-primary); }
+#label-input::placeholder { color: var(--text-placeholder); }
+#progress { text-align: center; margin-bottom: 8px; color: var(--text-secondary); }
+#step { color: var(--text-tertiary); font-size: 0.98em; margin-bottom: 8px; }
