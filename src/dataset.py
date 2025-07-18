@@ -2,7 +2,6 @@ import os
 import csv
 import cv2
 from torch.utils.data import Dataset
-from typing import Literal
 import torch
 
 
@@ -10,13 +9,12 @@ class CaptchaDataset(Dataset):
     """
     캡챠 이미지와 라벨을 반환하는 PyTorch Dataset 클래스.
     Parameters:
-        split: 'train' 또는 'test' 중 하나. 해당 split의 csv를 사용
         root_dir: dataset 폴더의 경로 (csv와 이미지가 포함된 루트)
     """
 
-    def __init__(self, split: Literal["train", "test"], root_dir: str):
+    def __init__(self, root_dir: str):
         self.root_dir = root_dir
-        csv_path = os.path.join(root_dir, f"{split}_list.csv")
+        csv_path = os.path.join(root_dir, "data_list.csv")
         self.samples: list[list[str]] = []
         with open(csv_path, newline="") as f:
             reader = csv.reader(f)

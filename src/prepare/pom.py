@@ -2,6 +2,7 @@ from playwright.sync_api import BrowserContext, Page, Locator
 from typing import Literal, Type
 import time
 
+
 class Pom:
     context: BrowserContext
     page: Page
@@ -33,16 +34,15 @@ class Pom:
                 c.getContext('2d').drawImage(img, 0, 0);
                 return c.toDataURL();
             }""",
-            img_elem
+            img_elem,
         )
-
 
     def save_captcha(self, path: str):
         if self.reload_btn_locator is None:
             raise ValueError("reload_btn_locator is None")
         if self.image_locator is None:
             raise ValueError("image_locator is None")
-        
+
         self.page.wait_for_load_state("networkidle")
         old_b64 = self._get_image_base64()
         self.reload_btn_locator.click()
@@ -60,9 +60,7 @@ class Pom:
 
         # 새 이미지가 완전히 로드될 때까지 기다림
         self.page.wait_for_function(
-            "(img) => img.complete && img.naturalWidth > 0",
-            arg=self.image_locator.element_handle(),
-            timeout=1000 * 5
+            "(img) => img.complete && img.naturalWidth > 0", arg=self.image_locator.element_handle(), timeout=1000 * 5
         )
         self.image_locator.screenshot(path=path, type="png")
 
@@ -152,13 +150,29 @@ class KMCERT_Page(Pom):
 
     def prepare(self):
         with self.context.expect_page() as page_info:
-            self.page.frame_locator("iframe[title='민원상담신청']").locator("a.be_06").click()
+            self.page.frame_locator("iframe[title='민원상담신청']").locator("a.be_03").click()
             self.page = page_info.value
 
-        # self.page.locator()
+        self.page.get_by_role("button", name="KT").first.click()
+        self.page.get_by_role("button", name="문자(SMS) 인증").click()
+        self.page.locator("#mobileCertAgree").check()
+        self.page.locator("#btnCertAuthStart").click()
+        name_locator = self.page.locator("#userName")
+        name_locator.fill("홍길동")
+        name_locator.press("Enter")
+        self.page.locator(".btnUserName").click()
+        num1_locator = self.page.locator("#myNum1")
+        num1_locator.fill("821203")
+        num1_locator.press("Enter")
+        num2_locator = self.page.locator("#myNum2")
+        num2_locator.fill("1")
+        num2_locator.press("Enter")
+        mobile_no_locator = self.page.locator("#mobileNo")
+        mobile_no_locator.fill("01012341234")
+        mobile_no_locator.press("Enter")
 
         self.image_locator = self.page.locator("#simpleCaptchaImg")
-        self.reload_btn_locator = self.page.locator("a[title='새로고침']")
+        self.reload_btn_locator = self.page.locator("#simpleCaptchaBtnReload")
 
 
 class PomFactory:
