@@ -16,3 +16,4 @@ logs/
 checkpoints/
 demo/
 .DS_Store
+.claude/

@@ -13,12 +13,10 @@ class CaptchaDataset(Dataset):
     """
 
     root_dir: str
-    label_length: int
     samples: list[list[str]]
 
-    def __init__(self, root_dir: str, label_length: int = 5):
+    def __init__(self, root_dir: str):
         self.root_dir = root_dir
-        self.label_length = label_length
         self.samples = self._load_samples(os.path.join(root_dir, "data_list.csv"))
 
     def _load_samples(self, csv_path: str) -> list[list[str]]:
@@ -49,8 +47,8 @@ class CaptchaDataset(Dataset):
 
         # 라벨 유효성검사
         label = raw_label
-        if not self._validate_label(label):
-            raise ValueError(f"Invalid label: {label} (must be {self.label_length}-digit string), {img_path}")
+        if not label.isdigit():
+            raise ValueError(f"Invalid label: {label} (must be digit string), {img_path}")
 
         # 텐서로 변환 및 유효성검사
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -67,13 +65,3 @@ class CaptchaDataset(Dataset):
         image = image.float() / 255.0  # (3, H, W) -> (3, H, W), 0.0~1.0
 
         return image, label
-
-    def _validate_label(self, label: str) -> bool:
-        """
-        라벨이 5자리 숫자 문자열인지 검사.
-        Parameters:
-            label (str): 검사할 라벨
-        Returns:
-            bool: 유효하면 True, 아니면 False
-        """
-        return len(label) == self.label_length and label.isdigit()
