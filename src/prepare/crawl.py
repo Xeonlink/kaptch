@@ -1,5 +1,5 @@
 from playwright.sync_api import BrowserContext, Page, sync_playwright
-from pom import PomFactory
+from prepare.pom import PomFactory
 import argparse
 import csv
 import os

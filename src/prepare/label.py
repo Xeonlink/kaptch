@@ -1,7 +1,6 @@
-from flask import Flask, request, send_from_directory, jsonify, Response
-import os
-import re
+from flask import Flask, request, send_from_directory, jsonify
 import csv
+import os
 
 
 app = Flask(__name__)
@@ -14,7 +13,7 @@ def root():
     Returns:
         Response: index.html 파일
     """
-    home_dir = os.path.join(os.path.dirname(__file__), "labeling")
+    home_dir = os.path.join(os.path.dirname(__file__), "label")
     return send_from_directory(home_dir, "index.html")
 
 
@@ -28,7 +27,7 @@ def home(name):
     Returns:
         Response: 요청된 파일 또는 404 에러
     """
-    home_dir = os.path.join(os.path.dirname(__file__), "labeling")
+    home_dir = os.path.join(os.path.dirname(__file__), "label")
     return send_from_directory(home_dir, name)
 
 

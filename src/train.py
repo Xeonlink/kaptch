@@ -1,8 +1,9 @@
 import os
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
 from dataset import CaptchaDataset
 from model import CaptchaNet
@@ -23,19 +24,20 @@ def get_device() -> torch.device:
     return torch.device("cpu")
 
 
-# 하이퍼파라미터
+# 하이퍼파라미터 & 옵션
 BATCH_SIZE = 64
 EPOCHS = 50
 LEARNING_RATE = 1e-3
 CHECKPOINT_DIR = "checkpoints"
 LOG_DIR = "logs"
-LOG_INTERVAL = 100
 DEVICE = get_device()
-IMG_HEIGHT = 80
-IMG_WIDTH = 200
 NUM_CLASSES = 10
 NUM_DIGITS = 5
 PATIENCE = 5
+TRAIN_SIZE = 1_000
+TEST_SIZE = 100
+SEED = 42
+DATASET_ROOT = os.path.join("dataset", "kmcert")
 
 # 디렉토리 생성
 os.makedirs(CHECKPOINT_DIR, exist_ok=True)
@@ -51,7 +53,7 @@ def one_hot_labels(labels: list[str]) -> torch.Tensor:
         torch.Tensor: (batch, 5, 10) one-hot
     """
     label_tensor = torch.tensor([[int(ch) for ch in label] for label in labels])  # (batch, 5)
-    one_hot = torch.nn.functional.one_hot(label_tensor, num_classes=NUM_CLASSES)  # (batch, 5, 10)
+    one_hot = F.one_hot(label_tensor, num_classes=NUM_CLASSES)  # (batch, 5, 10)
     return one_hot.float()
 
 
@@ -73,14 +75,16 @@ def evaluate(model: CaptchaNet, loader: DataLoader, device: torch.device) -> flo
 
 def main():
     # 데이터셋
-    train_set = CaptchaDataset("train", "dataset")
-    test_set = CaptchaDataset("test", "dataset")
+    dataset = CaptchaDataset(DATASET_ROOT, label_length=NUM_DIGITS)
+    generator = torch.Generator().manual_seed(SEED)
+    train_set, test_set = random_split(dataset, [TRAIN_SIZE, TEST_SIZE], generator)
+
     train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
     test_loader = DataLoader(test_set, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
 
     # 모델
     model = CaptchaNet().to(DEVICE)
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
 
@@ -91,16 +95,13 @@ def main():
         for batch_idx, (imgs, labels) in enumerate(train_loader):
             imgs = imgs.to(DEVICE)
             labels_oh = one_hot_labels(labels).to(DEVICE)
-
             outputs = model.forward(imgs)
             loss = criterion.forward(outputs, labels_oh)
-
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
             writer.add_scalar("Loss/train", loss.item(), epoch * len(train_loader) + batch_idx)
-        # scheduler.step()
 
         acc = evaluate(model, test_loader, DEVICE)
         writer.add_scalar("Accuracy/test", acc, epoch)

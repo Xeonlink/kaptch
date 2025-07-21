@@ -87,6 +87,8 @@ function updateLabelInput(label) {
 function updateLoadingState(isLoading) {
     if (isLoading) {
         elements.step.textContent = '로딩 중...';
+    } else {
+        elements.step.textContent = '라벨을 입력하고 Enter를 누르세요.';
     }
 }
 

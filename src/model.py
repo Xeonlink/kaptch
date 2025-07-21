@@ -7,7 +7,7 @@ class CaptchaNet(nn.Module):
     """
     캡챠 숫자 5자리를 예측하는 U-Net 기반 CNN 모델.
     Parameters:
-        입력: (W, H, 4) 또는 (batch, W, H, 4)
+        입력: (batch, 3, H, W), 0~1, float32
     Returns:
         (batch, 5, 10): 각 자리별 0~9 one-hot 예측값
     """
@@ -16,29 +16,30 @@ class CaptchaNet(nn.Module):
         super().__init__()
 
         self.block1 = nn.Sequential(
-            nn.Conv2d(4, 16, kernel_size=3, padding=1),
+            nn.Conv2d(3, 64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(2),
         )
         self.block2 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, padding=1),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2),
+            nn.MaxPool2d(4),
         )
         self.block3 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, padding=1),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(2),
         )
 
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.3)
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(16 * 8 * 20, 5 * 10)
+        self.fc = nn.Linear(64 * 4 * 10, 5 * 10)
+        self.softmax = nn.Softmax(dim=2)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Parameters:
-            x (torch.Tensor): (batch, 4, H, W), 0~1, float32
+            x (torch.Tensor): (batch, 3, H, W), 0~1, float32
         Returns:
             torch.Tensor: (batch, 5, 10) or list[str]
         """
@@ -73,5 +74,6 @@ class CaptchaNet(nn.Module):
         x = self.flatten(x)  # (B, 32*H/2*W/2)
         x = self.fc(x)  # (B, 5*10)
         x = x.view(-1, 5, 10)  # (B, 5, 10)
+        x = self.softmax(x)  # (B, 5, 10)
 
         return x
