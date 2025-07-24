@@ -1,21 +1,26 @@
 [project]
-name = "captcha-breaker"
+name = "kaptch"
 version = "0.1.0"
-description = "한국의 모바일인증 캡챠를 뚫는 프로젝트"
+description = "한국 모바일인증 캡챠 뚫기 파이프라인"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiofiles>=24.1.0",
     "aiohttp>=3.12.13",
     "flask>=3.1.1",
+    "inquirer>=3.4.0",
     "numpy>=2.2.6",
     "onnx>=1.18.0",
     "onnxruntime>=1.22.1",
     "opencv-python>=4.12.0.88",
+    "pillow>=11.3.0",
     "playwright>=1.53.0",
     "psutil>=7.0.0",
+    "pyfiglet>=1.0.3",
     "requests>=2.32.4",
+    "rich>=14.0.0",
     "tensorboard>=2.19.0",
     "torch>=2.7.1",
     "torchvision>=0.22.1",
+    "typer>=0.16.0",
 ]

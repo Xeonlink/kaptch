@@ -1,8 +1,9 @@
-import os
 import csv
 import cv2
-from torch.utils.data import Dataset
 import torch
+from pathlib import Path
+from torch.utils.data import Dataset
+from src.constants import DATA_CSV
 
 
 class CaptchaDataset(Dataset):
@@ -12,14 +13,14 @@ class CaptchaDataset(Dataset):
         root_dir: dataset 폴더의 경로 (csv와 이미지가 포함된 루트)
     """
 
-    root_dir: str
+    dataset_path: str
     samples: list[list[str]]
 
-    def __init__(self, root_dir: str):
-        self.root_dir = root_dir
-        self.samples = self._load_samples(os.path.join(root_dir, "data_list.csv"))
+    def __init__(self, dataset_path: Path):
+        self.dataset_path = dataset_path
+        self.samples = self._load_samples(dataset_path / DATA_CSV)
 
-    def _load_samples(self, csv_path: str) -> list[list[str]]:
+    def _load_samples(self, csv_path: Path) -> list[list[str]]:
         with open(csv_path, newline="") as f:
             reader = csv.reader(f)
             return list(reader)
@@ -38,7 +39,7 @@ class CaptchaDataset(Dataset):
         """
 
         rel_path, raw_label = self.samples[idx]
-        img_path = os.path.join(self.root_dir, rel_path)
+        img_path = self.dataset_path / rel_path
 
         # 이미지 유효성검사
         image = cv2.imread(img_path, cv2.IMREAD_COLOR)  # (H, W, 3) bgr

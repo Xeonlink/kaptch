@@ -11,9 +11,9 @@ wheels/
 
 # extra 
 .pytest_cache/
-dataset/
-logs/
-checkpoints/
-demo/
+/dataset/
+/logs/
+/checkpoints/
+/demo/
 .DS_Store
 .claude/

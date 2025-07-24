@@ -1,6 +1,7 @@
 from flask import Flask, request, send_from_directory, jsonify
 import csv
 import os
+from src.constants import DATA_CSV
 
 
 app = Flask(__name__)
@@ -49,7 +50,7 @@ def get_dataset(dataset: str):
         dict: 데이터셋 정보를 포함한 JSON 응답
     """
 
-    csv_path = os.path.join("dataset", dataset, "data_list.csv")
+    csv_path = os.path.join("dataset", dataset, DATA_CSV)
     if not os.path.exists(csv_path):
         return jsonify({"error": "Dataset not found"}), 404
 
@@ -78,7 +79,7 @@ def get_images(dataset: str, index: int):
     Returns:
         Response: 이미지 파일 또는 에러 응답
     """
-    csv_path = os.path.join("dataset", dataset, "data_list.csv")
+    csv_path = os.path.join("dataset", dataset, DATA_CSV)
     if not os.path.exists(csv_path):
         return jsonify({"error": "Dataset not found"}), 404
 
@@ -109,7 +110,7 @@ def post_labels(dataset: str, index: int):
     """
     data = request.get_json()
     label = data.get("label", "")
-    csv_path = os.path.join("dataset", dataset, "data_list.csv")
+    csv_path = os.path.join("dataset", dataset, DATA_CSV)
     if not os.path.exists(csv_path):
         return jsonify({"error": "Dataset not found"}), 404
 
@@ -132,5 +133,9 @@ def post_labels(dataset: str, index: int):
     return jsonify({"ok": True, "label": label, "index": index})
 
 
+def start_server(port: int = 3000, debug: bool = True):
+    app.run(debug=debug, port=port)
+
+
 if __name__ == "__main__":
-    app.run(debug=True, port=3000)
+    start_server()
