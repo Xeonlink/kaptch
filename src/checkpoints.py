@@ -10,10 +10,20 @@ from rich.table import Table
 from rich import box
 
 console = Console()
-app = typer.Typer()
+app = typer.Typer(help="체크포인트 관리 도구", rich_markup_mode="rich")
 
 
 def _tree_from_path(folder_path: Path, tree: Tree, style: Style) -> Tree:
+    """폴더 경로로부터 트리 구조를 생성합니다.
+
+    Parameters:
+        folder_path (Path): 탐색할 폴더 경로
+        tree (Tree): Rich Tree 객체
+        style (Style): 적용할 스타일
+
+    Returns:
+        Tree: 업데이트된 트리 객체
+    """
     for path in folder_path.iterdir():
         if path.is_dir():
             subtree = tree.add(path.name, style=style)
@@ -23,13 +33,30 @@ def _tree_from_path(folder_path: Path, tree: Tree, style: Style) -> Tree:
     return tree
 
 
-@app.command("list", help="List all checkpoints")
+@app.command("list", help="체크포인트 목록을 표시합니다")
 def list_checkpoints(name: str):
+    """특정 데이터셋의 모든 체크포인트 정보를 표시합니다.
+
+    Parameters:
+        name (str): 데이터셋 이름 또는 "all" (모든 데이터셋)
+
+    Examples:
+        python -m src.checkpoints list sci
+        python -m src.checkpoints list all
+        python -m src.checkpoints ls nice
+
+    표시되는 정보:
+    - Name: 체크포인트 파일명
+    - Epoch: 훈련 에포크 수
+    - Test Acc: 테스트 정확도
+    - Avg Loss: 평균 손실값
+    - LR: 학습률
+    """
 
     if name == "all":
-        for dataset_path in CHECKPOINT_ROOT.iterdir():
-            if dataset_path.is_dir():
-                list_checkpoints(dataset_path.name)
+        dataset_paths = filter(lambda x: x.is_dir(), CHECKPOINT_ROOT.iterdir())
+        for dataset_path in dataset_paths:
+            list_checkpoints(dataset_path.name)
 
         console.print("[bold green]All checkpoints listed[/bold green]")
         return
@@ -64,13 +91,26 @@ def list_checkpoints(name: str):
     console.print(table)
 
 
-@app.command(help="List all checkpoints (shortcut)")
+@app.command(help="체크포인트 목록을 표시합니다 (list 명령어의 단축형)")
 def ls(name: str):
+    """list 명령어의 단축형입니다. 체크포인트 목록을 표시합니다."""
     list_checkpoints(name)
 
 
-@app.command(help="Remove a checkpoint")
+@app.command(help="체크포인트를 삭제합니다")
 def remove(name: str):
+    """특정 데이터셋의 모든 체크포인트를 삭제합니다.
+
+    Parameters:
+        name (str): 삭제할 데이터셋 이름
+
+    Examples:
+        python -m src.checkpoints remove sci
+        python -m src.checkpoints rm old-dataset
+
+    ⚠️  주의: 이 작업은 되돌릴 수 없습니다.
+    checkpoints/{name}/ 폴더와 모든 체크포인트 파일이 영구적으로 삭제됩니다.
+    """
     if not typer.confirm(f"Are you sure you want to remove {name} checkpoints?"):
         console.print("[bold red]Remove cancelled[/bold red]")
         return
@@ -79,8 +119,9 @@ def remove(name: str):
     console.print(f"[bold green]Checkpoints {name} removed[/bold green]")
 
 
-@app.command(help="Remove a checkpoint (shortcut)")
+@app.command(help="체크포인트를 삭제합니다 (remove 명령어의 단축형)")
 def rm(name: str):
+    """remove 명령어의 단축형입니다. 체크포인트를 삭제합니다."""
     remove(name)
 
 

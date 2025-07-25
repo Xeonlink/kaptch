@@ -14,11 +14,15 @@ from src.train.checkpoint import Checkpoint
 from src.constants import CHECKPOINT_ROOT, DATASET_ROOT, DATA_CSV
 
 console = Console()
-app = typer.Typer()
+app = typer.Typer(help="모델 훈련 및 평가 도구", rich_markup_mode="rich")
 
 
 def get_device() -> torch.device:
-    """사용 가능한 torch device를 반환하는 함수."""
+    """사용 가능한 torch device를 반환합니다.
+
+    Returns:
+        torch.device: CUDA > MPS > CPU 순서로 사용 가능한 디바이스
+    """
     if torch.cuda.is_available():
         return torch.device("cuda")
     if torch.backends.mps.is_available():
@@ -73,6 +77,14 @@ def evaluate_ctc(model: CRNNNet, loader: DataLoader, device: torch.device) -> fl
 
 
 def is_trainable(dataset_name: str) -> bool:
+    """데이터셋이 훈련 가능한 상태인지 검증합니다.
+
+    Parameters:
+        dataset_name (str): 검증할 데이터셋 이름
+
+    Returns:
+        bool: 훈련 가능하면 True, 그렇지 않으면 False
+    """
     if not (DATASET_ROOT / dataset_name).exists():
         console.print(f"[bold red]Dataset {dataset_name} not found[/bold red]")
         return False
@@ -95,7 +107,7 @@ def is_trainable(dataset_name: str) -> bool:
     return True
 
 
-@app.command(help="Train a model")
+@app.command(help="CRNN 모델을 훈련합니다")
 def train(
     name: str,
     # 하이퍼파라미터
@@ -108,6 +120,31 @@ def train(
     seed: int = 42,
     warmup_epochs: int = 5,
 ):
+    """CRNN 모델을 사용하여 캡챠 인식 모델을 훈련합니다.
+
+    Parameters:
+        name (str): 훈련할 데이터셋 이름
+        batch_size (int): 배치 크기 (기본값: 32)
+        epochs (int): 훈련 에포크 수 (기본값: 50)
+        learning_rate (float): 학습률 (기본값: 2e-3)
+        patience (int): Early stopping 인내심 (기본값: 5)
+        train_size (int): 훈련 데이터 크기 (기본값: 1000)
+        test_size (int): 테스트 데이터 크기 (기본값: 100)
+        seed (int): 랜덤 시드 (기본값: 42)
+        warmup_epochs (int): 워밍업 에포크 수 (기본값: 5)
+
+    Examples:
+        python -m src.train train sci
+        python -m src.train train nice --epochs 100 --batch-size 64
+        python -m src.train train nhn_kcp --learning-rate 1e-3 --patience 10
+
+    훈련 전 확인사항:
+    - 데이터셋이 존재하는지 확인
+    - 모든 이미지에 라벨이 있는지 확인
+    - 충분한 GPU 메모리가 있는지 확인
+
+    훈련 중 체크포인트는 checkpoints/{name}/ 폴더에 저장됩니다.
+    """
     if not is_trainable(name):
         return
 

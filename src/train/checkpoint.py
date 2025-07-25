@@ -18,7 +18,7 @@ class Checkpoint:
         self.lr: float = lr
 
     def __str__(self):
-        return f"Checkpoint(epoch={self.epoch}, test_acc={self. test_acc:.4f}, avg_loss={self.avg_loss:.4f}, lr={self.lr:.2e})"
+        return f"Checkpoint(epoch={self.epoch}, test_acc={self.test_acc:.4f}, avg_loss={self.avg_loss:.4f}, lr={self.lr:.2e})"
 
     def __repr__(self):
         return self.__str__()
