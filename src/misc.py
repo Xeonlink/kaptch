@@ -87,12 +87,12 @@ def torch2onnx(name: str, checkpoint_name: str, output: str = "captcha.onnx", ve
 
     panel_content = "\n".join(
         [
-            f"Checkpoint: [bold green]{name}/{checkpoint_name}[/bold green]",
-            f"Expected Size: [bold green]{checkpoint_path.stat().st_size / 1024:.2f} KB[/bold green]",
-            f"Parameter Count: [bold green]{sum(p.numel() for p in script_module.parameters()) / 1_000_000:.2f} M[/bold green]",
-            f"Input Dimensions: [bold green]{mock_input.shape}[/bold green]",
-            f"Input Data Type: [bold green]{mock_input.dtype}[/bold green]",
-            f"Output: [bold green]{output}[/bold green]",
+            f"Checkpoint: [green]{name}/{checkpoint_name}[/]",
+            f"Expected Size: [green]{checkpoint_path.stat().st_size / 1024:.2f} KB[/]",
+            f"Parameter Count: [green]{sum(p.numel() for p in script_module.parameters()) / 1_000_000:.2f} M[/]",
+            f"Input Dimensions: [green]{mock_input.shape}[/]",
+            f"Input Data Type: [green]{mock_input.dtype}[/]",
+            f"Output: [green]{output}[/]",
         ]
     )
     panel = Panel(
@@ -126,7 +126,7 @@ def torch2onnx(name: str, checkpoint_name: str, output: str = "captcha.onnx", ve
         verbose=verbose,
     )
 
-    console.print(f"\n[bold green]Conversion finished.[/bold green]")
+    console.print(f"\n[bold green]Conversion finished.[/]")
 
 
 @app.command(help="ONNX 모델을 사용하여 이미지를 검증합니다", hidden=True)
@@ -155,7 +155,7 @@ def validate(name: str, checkpoint_name: str, image_path: str):
     output = output.tolist()
     output = output[0]
     output = _decode(output)
-    console.print(f"Output: [bold green]{output}[/bold green]")
+    console.print(f"Output: [bold green]{output}[/]")
 
 
 if __name__ == "__main__":

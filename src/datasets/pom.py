@@ -1,5 +1,5 @@
 from playwright.sync_api import BrowserContext, Page, Locator
-from typing import Literal, Type
+from typing import override
 import time
 
 
@@ -65,9 +65,10 @@ class Pom:
         self.image_locator.screenshot(path=path, type="png")
 
 
-class NHN_KCP_Page(Pom):
+class nhnkcp(Pom):
     gate_url = "https://user.cafe24.com/join/hosting/general/?page=step1&landTime=1751035289"
 
+    @override
     def prepare(self):
         self.page.locator("#agreeAll").check(force=True)
         with self.context.expect_page() as page_info:
@@ -82,9 +83,10 @@ class NHN_KCP_Page(Pom):
         self.reload_btn_locator = self.page.locator("#CAPTCHA_ReloadLink")
 
 
-class NICE평가정보_Page(Pom):
+class nice(Pom):
     gate_url = "https://www.seoul.go.kr/member/userlogin/loginCheck.do"
 
+    @override
     def prepare(self):
         self.page.get_by_role("link", name="본인확인 로그인").click()
 
@@ -114,9 +116,10 @@ class NICE평가정보_Page(Pom):
         self.reload_btn_locator = self.page.locator("#btnSimpleCaptchaReload")
 
 
-class SCI평가정보_Page(Pom):
+class sci(Pom):
     gate_url = "https://www.lotteimall.com/member/regist/forward.MemberRegist.lotte"
 
+    @override
     def prepare(self):
         self.page.locator("#info_chk").click()
         with self.context.expect_page() as page_info:
@@ -145,9 +148,10 @@ class SCI평가정보_Page(Pom):
         self.reload_btn_locator = self.page.locator("a[title='새로고침']")
 
 
-class KMCERT_Page(Pom):
+class kmcert(Pom):
     gate_url = "https://state.gwd.go.kr/portal/minwon/epeople/counsel"
 
+    @override
     def prepare(self):
         with self.context.expect_page() as page_info:
             self.page.frame_locator("iframe[title='민원상담신청']").locator("a.be_03").click()
@@ -175,24 +179,48 @@ class KMCERT_Page(Pom):
         self.reload_btn_locator = self.page.locator("#simpleCaptchaBtnReload")
 
 
-class PomFactory:
-    type Authcom = Literal["nhn_kcp", "nice", "sci", "kmcert"]
-    authcom_list: list[Authcom] = ["nhn_kcp", "nice", "sci", "kmcert"]
+class dream(Pom):
+    gate_url = "https://www.makeshop.co.kr/newmakeshop/home/create_shop.html"
 
-    @staticmethod
-    def create(authcom: Authcom, context: BrowserContext, page: Page) -> Type[Pom]:
-        if authcom == "nhn_kcp":
-            return NHN_KCP_Page(context, page)
-        elif authcom == "nice":
-            return NICE평가정보_Page(context, page)
-        elif authcom == "sci":
-            return SCI평가정보_Page(context, page)
-        elif authcom == "kmcert":
-            return KMCERT_Page(context, page)
+    @override
+    def prepare(self):
+        with self.context.expect_page() as page_info:
+            self.page.get_by_role("button", name="본인인증").click()
+            self.page = page_info.value
 
-    @staticmethod
-    def authcom_type(authcom: str) -> str:
-        if authcom in PomFactory.authcom_list:
-            return authcom
-        else:
-            raise ValueError(f"Unsupported authcom: {authcom}")
+        self.page.locator("button[data-telco='kt']").first.click()
+        self.page.locator("li[data-sign='pass'] > button").click()
+        self.page.locator("#user_agree_checkbox").click()
+        self.page.locator("button.btn_selsign").click()
+        name_locator = self.page.locator("#userName_pass")
+        name_locator.fill("홍길동")
+        name_locator.press("Enter")
+        self.page.locator("button.btnUserName_pass").click()
+        mobile_no_locator = self.page.locator("#mobileNo_pass")
+        mobile_no_locator.fill("01012341234")
+        mobile_no_locator.press("Enter")
+
+        self.image_locator = self.page.locator("#simpleCaptchaImg").filter(visible=True)
+        self.reload_btn_locator = self.page.locator("#btnSimpleCaptchaReload")
+
+
+class kgmobilians(Pom):
+    gate_url = "https://accounts.yanolja.com/?service=yanolja"
+
+    @override
+    def prepare(self):
+        self.page.get_by_role("button", name="이메일로 시작하기").click()
+        self.page.get_by_role("button", name="이메일로 가입하기").click()
+        self.page.get_by_role("button", name="전체 동의").click()
+
+        with self.context.expect_page() as page_info:
+            self.page.get_by_role("button", name="본인 인증하기").click()
+            self.page = page_info.value
+
+        self.page.evaluate(
+            "(section) => { section.style.display = 'block'; }",
+            self.page.locator("#smsStep1").element_handle(),
+        )
+
+        self.image_locator = self.page.get_by_alt_text("보안문자 숫자 6자리").filter(visible=True)
+        self.reload_btn_locator = self.page.locator("input.reLoad").filter(visible=True)

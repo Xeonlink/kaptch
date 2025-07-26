@@ -86,22 +86,22 @@ def is_trainable(dataset_name: str) -> bool:
         bool: 훈련 가능하면 True, 그렇지 않으면 False
     """
     if not (DATASET_ROOT / dataset_name).exists():
-        console.print(f"[bold red]Dataset {dataset_name} not found[/bold red]")
+        console.print(f"[bold red]Dataset {dataset_name} not found[/]")
         return False
 
     if not (DATASET_ROOT / dataset_name / DATA_CSV).exists():
-        console.print(f"[bold red]Dataset {dataset_name} is not labeled[/bold red]")
+        console.print(f"[bold red]Dataset {dataset_name} is not labeled[/]")
         return False
 
     with open(DATASET_ROOT / dataset_name / DATA_CSV, "r") as f:
         reader = csv.reader(f)
         for idx, (path, label) in enumerate(reader):
             if not (DATASET_ROOT / dataset_name / path).exists():
-                console.print(f"Image [bold red]not exist at {path}[/bold red]")
+                console.print(f"Image [bold red]not exist at {path}[/]")
                 return False
 
             if label == "":
-                console.print(f"Image [bold red]has no label at {path}[/bold red]")
+                console.print(f"Image [bold red]has no label at {path}[/]")
                 return False
 
     return True
@@ -150,19 +150,19 @@ def train(
 
     panel_content = "".join(
         [
-            f"Batch size: [green]{batch_size}[/green]\n",
-            f"Epochs: [green]{epochs}[/green]\n",
-            f"Learning rate: [green]{learning_rate:.0e}[/green]\n",
-            f"Patience: [green]{patience}[/green]\n",
-            f"Train size: [green]{train_size}[/green]\n",
-            f"Test size: [green]{test_size}[/green]\n",
+            f"Batch size: [green]{batch_size}[/]\n",
+            f"Epochs: [green]{epochs}[/]\n",
+            f"Learning rate: [green]{learning_rate:.0e}[/]\n",
+            f"Patience: [green]{patience}[/]\n",
+            f"Train size: [green]{train_size}[/]\n",
+            f"Test size: [green]{test_size}[/]\n",
             "\n",
-            f"[red]This will remove all checkpoints and start training from scratch.[/red]",
+            f"[red]This will remove all checkpoints and start training from scratch.[/]",
         ]
     )
     panel = Panel(
         panel_content,
-        title=f"[bold green]Traning {name}[/bold green]",
+        title=f"[bold green]Traning {name}[/]",
         title_align="left",
         border_style="bold green",
         padding=(1, 2),
@@ -170,7 +170,7 @@ def train(
     console.print(panel)
 
     if not typer.confirm(f"Are you sure you want to train {name}?"):
-        console.print("[bold red]Training cancelled[/bold red]")
+        console.print("[bold red]Training cancelled[/]")
         return
 
     device = get_device()
@@ -242,15 +242,15 @@ def train(
         # print progress
         if acc > best_acc:
             console.print(
-                f"[default not bold]Epoch: {epoch:02d} | Test Acc: [green]{acc:.4f}[/green] | Avg Loss: {avg_loss:.4f} | LR: {current_lr:.2e}[/default not bold]"
+                f"[default not bold]Epoch: {epoch:02d} | Test Acc: [green]{acc:.4f}[/] | Avg Loss: {avg_loss:.4f} | LR: {current_lr:.2e}[/]"
             )
         elif acc == best_acc:
             console.print(
-                f"[default not bold]Epoch: {epoch:02d} | Test Acc: [yellow]{acc:.4f}[/yellow] | Avg Loss: {avg_loss:.4f} | LR: {current_lr:.2e}[/default not bold]"
+                f"[default not bold]Epoch: {epoch:02d} | Test Acc: [yellow]{acc:.4f}[/] | Avg Loss: {avg_loss:.4f} | LR: {current_lr:.2e}[/]"
             )
         else:
             console.print(
-                f"[default not bold]Epoch: {epoch:02d} | Test Acc: [red]{acc:.4f}[/red] | Avg Loss: {avg_loss:.4f} | LR: {current_lr:.2e}[/default not bold]"
+                f"[default not bold]Epoch: {epoch:02d} | Test Acc: [red]{acc:.4f}[/] | Avg Loss: {avg_loss:.4f} | LR: {current_lr:.2e}[/]"
             )
 
         # Early stopping logic
@@ -261,14 +261,12 @@ def train(
             patience_counter += 1
             if patience_counter >= patience:
                 console.print("")
-                console.print(
-                    f"Early stopped at [yellow]{epoch}[/yellow] epoch (patience: [yellow]{patience}[/yellow] epochs)"
-                )
+                console.print(f"Early stopped at [yellow]{epoch}[/] epoch (patience: [yellow]{patience}[/] epochs)")
                 console.print(f"Training finished. Final test acc: {acc:.4f}")
                 return
 
     # finish training
-    console.print(f"Training finished. Final test acc: [bold green]{acc:.4f}[/bold green]")
+    console.print(f"Training finished. Final test acc: [bold green]{acc:.4f}[/]")
 
 
 if __name__ == "__main__":

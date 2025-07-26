@@ -58,11 +58,11 @@ def list_checkpoints(name: str):
         for dataset_path in dataset_paths:
             list_checkpoints(dataset_path.name)
 
-        console.print("[bold green]All checkpoints listed[/bold green]")
+        console.print("[bold green]All checkpoints listed[/]")
         return
 
     table = Table(
-        title=f"Checkpoints for [bold yellow]{name}[/bold yellow]",
+        title=f"Checkpoints for [bold yellow]{name}[/]",
         title_style=Style(color="white", bold=False),
         header_style="green",
         box=box.ROUNDED,
@@ -112,11 +112,11 @@ def remove(name: str):
     checkpoints/{name}/ 폴더와 모든 체크포인트 파일이 영구적으로 삭제됩니다.
     """
     if not typer.confirm(f"Are you sure you want to remove {name} checkpoints?"):
-        console.print("[bold red]Remove cancelled[/bold red]")
+        console.print("[bold red]Remove cancelled[/]")
         return
 
     shutil.rmtree(CHECKPOINT_ROOT / name)
-    console.print(f"[bold green]Checkpoints {name} removed[/bold green]")
+    console.print(f"[bold green]Checkpoints {name} removed[/]")
 
 
 @app.command(help="체크포인트를 삭제합니다 (remove 명령어의 단축형)")
