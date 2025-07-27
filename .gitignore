@@ -17,3 +17,4 @@ wheels/
 /demo/
 .DS_Store
 .claude/
+/.output

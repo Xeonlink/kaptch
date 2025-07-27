@@ -10,6 +10,7 @@ from rich.console import Console
 from pathlib import Path
 from src.train.checkpoint import Checkpoint
 from rich.panel import Panel
+from typing_extensions import Annotated
 
 console = Console()
 app = typer.Typer(help="기타 유틸리티 도구", rich_markup_mode="rich")
@@ -50,7 +51,12 @@ def _decode(output: list[int]) -> str:
 
 
 @app.command(help="PyTorch 체크포인트를 ONNX 형식으로 변환합니다")
-def torch2onnx(name: str, checkpoint_name: str, output: str = "captcha.onnx", verbose: bool = False):
+def torch2onnx(
+    name: str,
+    checkpoint_name: str,
+    output: Annotated[str, typer.Option(help="출력 ONNX 파일명")] = "captcha.onnx",
+    verbose: Annotated[bool, typer.Option(help="상세 출력 모드")] = False,
+):
     """PyTorch 모델 체크포인트를 ONNX 형식으로 변환합니다.
 
     Parameters:
@@ -130,7 +136,11 @@ def torch2onnx(name: str, checkpoint_name: str, output: str = "captcha.onnx", ve
 
 
 @app.command(help="ONNX 모델을 사용하여 이미지를 검증합니다", hidden=True)
-def validate(name: str, checkpoint_name: str, image_path: str):
+def validate(
+    name: str,
+    checkpoint_name: str,
+    image_path: Annotated[str, typer.Option(help="테스트할 이미지 파일 경로")],
+):
     """ONNX 모델을 사용하여 특정 이미지에 대한 예측을 수행합니다.
 
     Parameters:

@@ -177,7 +177,7 @@ def crawl(
     name: str,
     classname: Annotated[str, typer.Option(help="사용할 POM 클래스명")] = "{name}",
     goal: Annotated[int, typer.Option(help="수집할 목표 이미지 개수")] = 1100,
-    headless: Annotated[bool, typer.Option(help="헤드리스 모드로 실행")] = False,
+    debug: Annotated[bool, typer.Option(help="디버그 모드로 실행")] = False,
 ):
     """웹사이트에서 캡챠 이미지를 자동으로 수집합니다.
 
@@ -214,7 +214,7 @@ def crawl(
             f"[bold]Params[/]\n",
             f" - page: [bold blue]class[/] [bold green]{classname}[/][bold white]([/][bold green]Pom[/][bold white]):[/]\n",
             f" - goal: [green]{goal:,}[/]\n",
-            f" - headless: [blue]{headless}[/]\n",
+            f" - headless: [blue]{not debug}[/]\n",
             "\n",
             "[red]This operation cannot be undo.[/]",
         ]
@@ -241,8 +241,12 @@ def crawl(
         return
 
     with sync_playwright() as p:
+        headless = not debug
         browser = p.chromium.launch(headless=headless)
-        context = browser.new_context()
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 720},
+        )
         page = context.new_page()
 
         pom = class_(context, page)

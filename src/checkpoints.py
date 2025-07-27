@@ -8,6 +8,7 @@ import shutil
 from src.train.checkpoint import Checkpoint
 from rich.table import Table
 from rich import box
+from typing_extensions import Annotated
 
 console = Console()
 app = typer.Typer(help="체크포인트 관리 도구", rich_markup_mode="rich")
@@ -34,7 +35,9 @@ def _tree_from_path(folder_path: Path, tree: Tree, style: Style) -> Tree:
 
 
 @app.command("list", help="체크포인트 목록을 표시합니다")
-def list_checkpoints(name: str):
+def list_checkpoints(
+    name: Annotated[str, typer.Option(help="데이터셋 이름")] = "all",
+):
     """특정 데이터셋의 모든 체크포인트 정보를 표시합니다.
 
     Parameters:
@@ -79,11 +82,20 @@ def list_checkpoints(name: str):
         checkpoint.name = checkpoint_path.name
         checkpoints.append(checkpoint)
 
+    prev_test_acc = 0
     for checkpoint in sorted(checkpoints, key=lambda x: x.epoch):
+        if checkpoint.test_acc > prev_test_acc:
+            test_acc_color = "green"
+            prev_test_acc = checkpoint.test_acc
+        elif checkpoint.test_acc == prev_test_acc:
+            test_acc_color = "yellow"
+        else:
+            test_acc_color = "red"
+
         table.add_row(
             checkpoint.name,
             str(checkpoint.epoch),
-            f"{checkpoint.test_acc:.4f}",
+            f"[{test_acc_color}]{checkpoint.test_acc:.4f}[/]",
             f"{checkpoint.avg_loss:.4f}",
             f"{checkpoint.lr:.2e}",
         )
@@ -92,7 +104,9 @@ def list_checkpoints(name: str):
 
 
 @app.command(help="체크포인트 목록을 표시합니다 (list 명령어의 단축형)")
-def ls(name: str):
+def ls(
+    name: Annotated[str, typer.Option(help="데이터셋 이름")] = "all",
+):
     """list 명령어의 단축형입니다. 체크포인트 목록을 표시합니다."""
     list_checkpoints(name)
 

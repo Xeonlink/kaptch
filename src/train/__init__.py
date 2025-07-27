@@ -95,7 +95,7 @@ def is_trainable(dataset_name: str) -> bool:
 
     with open(DATASET_ROOT / dataset_name / DATA_CSV, "r") as f:
         reader = csv.reader(f)
-        for idx, (path, label) in enumerate(reader):
+        for path, label in reader:
             if not (DATASET_ROOT / dataset_name / path).exists():
                 console.print(f"Image [bold red]not exist at {path}[/]")
                 return False
