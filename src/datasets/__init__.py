@@ -22,7 +22,7 @@ def _get_dataset_info(dataset: Path) -> tuple[int, int, int, int, int]:
     """데이터셋의 정보를 분석합니다.
 
     Parameters:
-        dataset (Path): 데이터셋 디렉토리 경로
+        dataset: 데이터셋 디렉토리 경로
 
     Returns:
         tuple[int, int, int, int, int]: (총개수, 라벨됨, 라벨안됨, 너비, 높이)
@@ -104,9 +104,6 @@ def create(
 ):
     """새로운 데이터셋을 생성합니다.
 
-    Parameters:
-        name (str): 생성할 데이터셋 이름 (하이픈은 언더스코어로 변환됨)
-
     Examples:
         python -m src.datasets create my-captcha-dataset
         python -m src.datasets create sci_evaluation
@@ -164,9 +161,6 @@ def crawl(
     debug: Annotated[bool, typer.Option(help="디버그 모드로 실행")] = False,
 ):
     """웹사이트에서 캡챠 이미지를 자동으로 수집합니다.
-
-    Parameters:
-        name (str): 데이터셋 이름
 
     수집된 이미지는 dataset/{name}/data/ 폴더에 저장되며,
     data_list.csv 파일에 경로와 빈 라벨이 추가됩니다.
@@ -257,10 +251,6 @@ def label(
 ):
     """웹 브라우저를 통해 캡챠 이미지에 라벨을 붙일 수 있는 서버를 시작합니다.
 
-    Parameters:
-        port (int): 서버 포트 번호 (기본값: 3000)
-        debug (bool): 디버그 모드 활성화 (기본값: False)
-
     서버가 시작되면 웹 브라우저에서 http://localhost:{port}로 접속하여
     라벨링 작업을 진행할 수 있습니다.
 
@@ -278,9 +268,6 @@ def remove(
     name: Annotated[str, typer.Argument(help="삭제할 데이터셋 이름")],
 ):
     """데이터셋과 관련된 모든 파일을 삭제합니다.
-
-    Parameters:
-        name (str): 삭제할 데이터셋 이름
 
     Examples:
         python -m src.datasets remove old-dataset

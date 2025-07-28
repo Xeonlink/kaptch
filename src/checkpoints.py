@@ -18,9 +18,9 @@ def _tree_from_path(folder_path: Path, tree: Tree, style: Style) -> Tree:
     """폴더 경로로부터 트리 구조를 생성합니다.
 
     Parameters:
-        folder_path (Path): 탐색할 폴더 경로
-        tree (Tree): Rich Tree 객체
-        style (Style): 적용할 스타일
+        folder_path: 탐색할 폴더 경로
+        tree: Rich Tree 객체
+        style: 적용할 스타일
 
     Returns:
         Tree: 업데이트된 트리 객체
@@ -39,9 +39,6 @@ def list_checkpoints(
     name: Annotated[str, typer.Option(help="데이터셋 이름")] = "all",
 ):
     """특정 데이터셋의 모든 체크포인트 정보를 표시합니다.
-
-    Parameters:
-        name (str): 데이터셋 이름 또는 "all" (모든 데이터셋)
 
     Examples:
         python -m src.checkpoints list sci
@@ -112,11 +109,10 @@ def ls(
 
 
 @app.command(help="체크포인트를 삭제합니다")
-def remove(name: str):
+def remove(
+    name: Annotated[str, typer.Argument(help="삭제할 데이터셋 이름")],
+):
     """특정 데이터셋의 모든 체크포인트를 삭제합니다.
-
-    Parameters:
-        name (str): 삭제할 데이터셋 이름
 
     Examples:
         python -m src.checkpoints remove sci
@@ -134,7 +130,9 @@ def remove(name: str):
 
 
 @app.command(help="체크포인트를 삭제합니다 (remove 명령어의 단축형)")
-def rm(name: str):
+def rm(
+    name: Annotated[str, typer.Argument(help="삭제할 데이터셋 이름")],
+):
     """remove 명령어의 단축형입니다. 체크포인트를 삭제합니다."""
     remove(name)
 

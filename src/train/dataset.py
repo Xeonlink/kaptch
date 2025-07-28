@@ -32,7 +32,7 @@ class CaptchaDataset(Dataset):
         """
         이미지와 라벨을 반환.
         Parameters:
-            idx (int): 인덱스
+            idx: 인덱스
         Returns:
             image: (3, h, w) (rgb), float32, 0.0~1.0
             label: 이미지에 적힌 숫자 (str)
@@ -61,8 +61,8 @@ class CaptchaDataset(Dataset):
         if image.shape[2] != 3:
             raise ValueError(f"Image must have 3 channels, but got {image.shape[2]}, {img_path}")
 
-        # 이미지 정규화
+        # 정규화 및 차원 변환
+        image = image.float() / 255.0  # 0~1로 정규화
         image = image.permute(2, 0, 1)  # (H, W, 3) -> (3, H, W)
-        image = image.float() / 255.0  # (3, H, W) -> (3, H, W), 0.0~1.0
 
         return image, label

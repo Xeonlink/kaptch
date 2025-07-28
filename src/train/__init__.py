@@ -12,6 +12,7 @@ from rich.console import Console
 from rich.panel import Panel
 from src.train.checkpoint import Checkpoint
 from src.constants import CHECKPOINT_ROOT, DATASET_ROOT, DATA_CSV
+from typing_extensions import Annotated
 
 console = Console()
 app = typer.Typer(help="모델 훈련 및 평가 도구", rich_markup_mode="rich")
@@ -33,10 +34,10 @@ def get_device() -> torch.device:
 def encode_labels_ctc(labels: list[str]) -> tuple[torch.Tensor, torch.Tensor]:
     """
     Parameters:
-        labels (list[str]): 각 샘플의 숫자 문자열 (batch)
+        labels: 각 샘플의 숫자 문자열 (batch)
     Returns:
-        targets (torch.Tensor): (sum_label_len,) 모든 라벨을 1D로 이어붙인 int tensor
-        lengths (torch.Tensor): (batch,) 각 라벨의 길이
+        targets: (sum_label_len,) 모든 라벨을 1D로 이어붙인 int tensor
+        lengths: (batch,) 각 라벨의 길이
     """
     targets = [int(ch) for label in labels for ch in label]
     lengths = [len(label) for label in labels]
@@ -80,7 +81,7 @@ def is_trainable(dataset_name: str) -> bool:
     """데이터셋이 훈련 가능한 상태인지 검증합니다.
 
     Parameters:
-        dataset_name (str): 검증할 데이터셋 이름
+        dataset_name: 검증할 데이터셋 이름
 
     Returns:
         bool: 훈련 가능하면 True, 그렇지 않으면 False
@@ -109,29 +110,17 @@ def is_trainable(dataset_name: str) -> bool:
 
 @app.command(help="CRNN 모델을 훈련합니다")
 def train(
-    name: str,
-    # 하이퍼파라미터
-    batch_size: int = 32,
-    epochs: int = 50,
-    learning_rate: float = 2e-3,
-    patience: int = 5,
-    train_size: int = 1_000,
-    test_size: int = 100,
-    seed: int = 42,
-    warmup_epochs: int = 5,
+    name: Annotated[str, typer.Argument(help="훈련할 데이터셋 이름")],
+    batch_size: Annotated[int, typer.Option(help="배치 크기")] = 32,
+    epochs: Annotated[int, typer.Option(help="훈련 에포크 수")] = 50,
+    learning_rate: Annotated[float, typer.Option(help="학습률")] = 2e-3,
+    patience: Annotated[int, typer.Option(help="Early stopping 인내심")] = 5,
+    train_size: Annotated[int, typer.Option(help="훈련 데이터 크기")] = 1_000,
+    test_size: Annotated[int, typer.Option(help="테스트 데이터 크기")] = 100,
+    seed: Annotated[int, typer.Option(help="랜덤 시드")] = 42,
+    warmup_epochs: Annotated[int, typer.Option(help="워밍업 에포크 수")] = 5,
 ):
     """CRNN 모델을 사용하여 캡챠 인식 모델을 훈련합니다.
-
-    Parameters:
-        name (str): 훈련할 데이터셋 이름
-        batch_size (int): 배치 크기 (기본값: 32)
-        epochs (int): 훈련 에포크 수 (기본값: 50)
-        learning_rate (float): 학습률 (기본값: 2e-3)
-        patience (int): Early stopping 인내심 (기본값: 5)
-        train_size (int): 훈련 데이터 크기 (기본값: 1000)
-        test_size (int): 테스트 데이터 크기 (기본값: 100)
-        seed (int): 랜덤 시드 (기본값: 42)
-        warmup_epochs (int): 워밍업 에포크 수 (기본값: 5)
 
     Examples:
         python -m src.train train sci

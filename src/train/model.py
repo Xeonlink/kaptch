@@ -61,7 +61,7 @@ class CRNNNet(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Parameters:
-            x (torch.Tensor): (batch, 3, H, W), 0~1, float32
+            x: (batch, 3, H, W), 0~1, float32
         Returns:
             torch.Tensor: (batch, T, num_classes) (logits)
         """

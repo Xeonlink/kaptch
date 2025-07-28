@@ -20,7 +20,7 @@ def _load_image(img_path: str) -> torch.Tensor:
     """이미지를 로드하고 전처리합니다.
 
     Parameters:
-        img_path (str): 이미지 파일 경로
+        img_path: 이미지 파일 경로
 
     Returns:
         torch.Tensor: 전처리된 이미지 텐서 (W, H, 3)
@@ -36,7 +36,7 @@ def _decode(output: list[int]) -> str:
     """CTC 디코딩 결과를 문자열로 변환합니다.
 
     Parameters:
-        output (list[int]): CTC 모델의 예측 결과
+        output: CTC 모델의 예측 결과
 
     Returns:
         str: 디코딩된 문자열
@@ -52,18 +52,13 @@ def _decode(output: list[int]) -> str:
 
 @app.command(help="PyTorch 체크포인트를 ONNX 형식으로 변환합니다")
 def torch2onnx(
-    name: str,
-    checkpoint_name: str,
+    name: Annotated[str, typer.Argument(help="데이터셋 이름")],
+    checkpoint_name: Annotated[str, typer.Argument(help="체크포인트 파일명 (예: ep4.pkl)")],
     output: Annotated[str, typer.Option(help="출력 ONNX 파일명")] = "captcha.onnx",
     verbose: Annotated[bool, typer.Option(help="상세 출력 모드")] = False,
+    optset_version: Annotated[int, typer.Option(help="ONNX 옵션셋 버전")] = 10,
 ):
     """PyTorch 모델 체크포인트를 ONNX 형식으로 변환합니다.
-
-    Parameters:
-        name (str): 데이터셋 이름
-        checkpoint_name (str): 체크포인트 파일명 (예: ep4.pkl)
-        output (str): 출력 ONNX 파일명 (기본값: captcha.onnx)
-        verbose (bool): 상세 출력 모드 (기본값: False)
 
     Examples:
         python -m src.misc torch2onnx sci ep4.pkl
@@ -120,13 +115,9 @@ def torch2onnx(
         f=output,
         input_names=["x"],
         output_names=["y"],
-        opset_version=11,
+        opset_version=optset_version,
         dynamic_axes={
-            "x": {
-                # 0: "batch_size",
-                2: "height",
-                3: "width",
-            },
+            # "x": {0: "batch_size", 2: "height", 3: "width"},
             # "y": {0: "batch_size", 2: "height", 3: "width"},
         },
         verbose=verbose,
@@ -137,16 +128,11 @@ def torch2onnx(
 
 @app.command(help="ONNX 모델을 사용하여 이미지를 검증합니다", hidden=True)
 def validate(
-    name: str,
-    checkpoint_name: str,
+    name: Annotated[str, typer.Argument(help="데이터셋 이름")],
+    checkpoint_name: Annotated[str, typer.Argument(help="체크포인트 파일명")],
     image_path: Annotated[str, typer.Option(help="테스트할 이미지 파일 경로")],
 ):
     """ONNX 모델을 사용하여 특정 이미지에 대한 예측을 수행합니다.
-
-    Parameters:
-        name (str): 데이터셋 이름
-        checkpoint_name (str): 체크포인트 파일명
-        image_path (str): 테스트할 이미지 파일 경로
 
     Examples:
         python -m src.misc validate sci ep4.pkl test-image.png

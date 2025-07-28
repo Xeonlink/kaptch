@@ -48,12 +48,12 @@ class Pom:
         start = time.time()
         while True:
             new_b64 = self.__get_image_base64()
+            time.sleep(0.05)
             if new_b64 != old_b64:
                 return new_b64
 
             if time.time() - start > timeout:
                 raise TimeoutError("Image base64 did not change after reload")
-            time.sleep(0.05)
 
     def save_captcha(self, path: str):
         if self.reload_btn_locator is None:
