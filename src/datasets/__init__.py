@@ -1,4 +1,3 @@
-import os
 import csv
 import typer
 import importlib
@@ -12,10 +11,8 @@ from rich.progress import track
 from src.datasets.pom import Pom
 from playwright.sync_api import sync_playwright
 from PIL import Image
-from src.datasets.label import start_server
 from src.constants import DATASET_ROOT, DATA_CSV
 from typing_extensions import Annotated
-import webbrowser
 
 console = Console()
 app = typer.Typer(help="데이터셋 관리 도구", rich_markup_mode="rich")
@@ -64,23 +61,6 @@ def _str_width_height(width: int, height: int) -> str:
         return f"{width:,}", f"{height:,}"
 
 
-def _get_current_count(dataset_path: Path) -> int:
-    """데이터셋의 현재 이미지 개수를 반환합니다.
-
-    Parameters:
-        dataset_path (Path): 데이터셋 디렉토리 경로
-
-    Returns:
-        int: 현재 데이터셋의 이미지 개수
-    """
-    with open(dataset_path / DATA_CSV, "r") as f:
-        count = 0
-        reader = csv.reader(f)
-        for _ in reader:
-            count += 1
-    return count
-
-
 @app.command("list", help="모든 데이터셋 목록을 표시합니다")
 def list_datasets():
     """데이터셋 디렉토리에 있는 모든 데이터셋의 정보를 표시합니다.
@@ -119,7 +99,9 @@ def ls():
 
 
 @app.command(help="새로운 데이터셋을 생성합니다")
-def create(name: str):
+def create(
+    name: Annotated[str, typer.Argument(help="생성할 데이터셋 이름")],
+):
     """새로운 데이터셋을 생성합니다.
 
     Parameters:
@@ -167,14 +149,16 @@ def create(name: str):
 
 
 @app.command(help="새로운 데이터셋을 생성합니다 (create 명령어의 단축형)")
-def add(name: str):
+def add(
+    name: Annotated[str, typer.Argument(help="생성할 데이터셋 이름")],
+):
     """create 명령어의 단축형입니다. 새로운 데이터셋을 생성합니다."""
     create(name)
 
 
 @app.command(help="웹에서 캡챠 이미지를 자동으로 수집합니다")
 def crawl(
-    name: str,
+    name: Annotated[str, typer.Argument(help="데이터셋 이름")],
     classname: Annotated[str, typer.Option(help="사용할 POM 클래스명")] = "{name}",
     goal: Annotated[int, typer.Option(help="수집할 목표 이미지 개수")] = 1100,
     debug: Annotated[bool, typer.Option(help="디버그 모드로 실행")] = False,
@@ -256,9 +240,8 @@ def crawl(
         with open(path / DATA_CSV, "a") as f:
             writer = csv.writer(f)
             for idx in track(range(total, goal), description="Crawling..."):
-                folder_path = path / "data" / f"{idx // 1000:03d}"
-                os.makedirs(folder_path, exist_ok=True)
-                image_path = folder_path / f"{idx % 1000:03d}.png"
+                image_path = path / "data" / f"{idx // 1000:03d}" / f"{idx % 1000:03d}.png"
+                image_path.parent.mkdir(parents=True, exist_ok=True)
                 pom.save_captcha(image_path)
                 writer.writerow([image_path.relative_to(path), ""])
 
@@ -267,28 +250,33 @@ def crawl(
 
 
 @app.command(help="웹 기반 라벨링 서버를 시작합니다")
-def label(port: int = 3000, debug: bool = True):
+def label(
+    host: Annotated[str, typer.Option(help="서버 호스트 주소")] = "localhost",
+    port: Annotated[int, typer.Option(help="서버 포트 번호")] = 3000,
+    debug: Annotated[bool, typer.Option(help="디버그 모드 활성화")] = False,
+):
     """웹 브라우저를 통해 캡챠 이미지에 라벨을 붙일 수 있는 서버를 시작합니다.
 
     Parameters:
         port (int): 서버 포트 번호 (기본값: 3000)
-        debug (bool): 디버그 모드 활성화 (기본값: True)
-
-    Examples:
-        python -m src.datasets label
-        python -m src.datasets label --port 8080 --debug False
+        debug (bool): 디버그 모드 활성화 (기본값: False)
 
     서버가 시작되면 웹 브라우저에서 http://localhost:{port}로 접속하여
     라벨링 작업을 진행할 수 있습니다.
 
     라벨링 완료 후에는 train 명령어로 모델 훈련을 시작할 수 있습니다.
     """
-    webbrowser.open(f"http://localhost:{port}")
-    start_server(port, debug)
+    from src.datasets.label import app as webapp
+    import webbrowser
+
+    webbrowser.open(f"http://{host}:{port}")
+    webapp.run(debug=debug, port=port, host=host)
 
 
 @app.command(help="데이터셋을 삭제합니다")
-def remove(name: str):
+def remove(
+    name: Annotated[str, typer.Argument(help="삭제할 데이터셋 이름")],
+):
     """데이터셋과 관련된 모든 파일을 삭제합니다.
 
     Parameters:
@@ -340,6 +328,8 @@ def remove(name: str):
 
 
 @app.command(help="데이터셋을 삭제합니다 (remove 명령어의 단축형)")
-def rm(name: str):
+def rm(
+    name: Annotated[str, typer.Argument(help="삭제할 데이터셋 이름")],
+):
     """remove 명령어의 단축형입니다. 데이터셋을 삭제합니다."""
     remove(name)

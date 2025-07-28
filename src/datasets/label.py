@@ -133,9 +133,7 @@ def post_labels(dataset: str, index: int):
     return jsonify({"ok": True, "label": label, "index": index})
 
 
-def start_server(port: int = 3000, debug: bool = True):
-    app.run(debug=debug, port=port)
-
-
 if __name__ == "__main__":
-    start_server()
+    debug = True
+    port = 3000
+    app.run(debug=debug, port=port)

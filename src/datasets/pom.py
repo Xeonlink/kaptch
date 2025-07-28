@@ -1,6 +1,10 @@
 from playwright.sync_api import BrowserContext, Page, Locator
 from typing import override
 import time
+from pathlib import Path
+import base64
+from PIL import Image
+from io import BytesIO
 
 
 class Pom:
@@ -21,21 +25,35 @@ class Pom:
     def prepare(self):
         pass
 
-    def _get_image_base64(self) -> str:
+    def __get_image_base64(self) -> str:
         """이미지 엘리먼트의 base64 데이터를 반환합니다."""
         img_elem = self.image_locator.element_handle()
         if img_elem is None:
             raise ValueError("이미지 엘리먼트를 찾을 수 없습니다.")
+
         return self.page.evaluate(
-            """img => {
-                const c = document.createElement('canvas');
-                c.width = img.naturalWidth;
-                c.height = img.naturalHeight;
-                c.getContext('2d').drawImage(img, 0, 0);
-                return c.toDataURL();
+            """image => {
+                const canvas = document.createElement('canvas');
+                canvas.width = image.naturalWidth;
+                canvas.height = image.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(image, 0, 0);
+                return canvas.toDataURL('image/png');
             }""",
             img_elem,
         )
+
+    def __wait_for_b64_change(self, old_b64: str) -> str:
+        timeout = 5  # seconds
+        start = time.time()
+        while True:
+            new_b64 = self.__get_image_base64()
+            if new_b64 != old_b64:
+                return new_b64
+
+            if time.time() - start > timeout:
+                raise TimeoutError("Image base64 did not change after reload")
+            time.sleep(0.05)
 
     def save_captcha(self, path: str):
         if self.reload_btn_locator is None:
@@ -44,25 +62,23 @@ class Pom:
             raise ValueError("image_locator is None")
 
         self.page.wait_for_load_state("networkidle")
-        old_b64 = self._get_image_base64()
+        old_b64 = self.__get_image_base64()
         self.reload_btn_locator.click()
 
-        # base64 데이터가 바뀔 때까지 polling
-        timeout = 5  # seconds
-        start = time.time()
-        while True:
-            new_b64 = self._get_image_base64()
-            if new_b64 != old_b64:
-                break
-            if time.time() - start > timeout:
-                raise TimeoutError("Image base64 did not change after reload")
-            time.sleep(0.05)
+        new_b64_bytes = b""
+        while len(new_b64_bytes) == 0:
+            new_b64 = self.__wait_for_b64_change(old_b64)
+            new_b64_bytes = base64.b64decode(new_b64.split(",")[1])
 
-        # 새 이미지가 완전히 로드될 때까지 기다림
-        self.page.wait_for_function(
-            "(img) => img.complete && img.naturalWidth > 0", arg=self.image_locator.element_handle(), timeout=1000 * 5
-        )
-        self.image_locator.screenshot(path=path, type="png")
+        image = Image.open(BytesIO(new_b64_bytes))
+        if image.mode in ("RGBA", "LA"):
+            background = Image.new("RGB", image.size, (255, 255, 255))
+            background.paste(image, mask=image.split()[-1])
+            image = background
+        else:
+            image = image.convert("RGB")
+
+        image.save(path)
 
 
 class nhnkcp(Pom):
