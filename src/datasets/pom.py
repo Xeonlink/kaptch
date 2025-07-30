@@ -25,7 +25,7 @@ class Pom:
     def prepare(self):
         pass
 
-    def __get_image_base64(self) -> str:
+    def _get_image_base64(self) -> str:
         """이미지 엘리먼트의 base64 데이터를 반환합니다."""
         img_elem = self.image_locator.element_handle()
         if img_elem is None:
@@ -47,7 +47,7 @@ class Pom:
         timeout = 5  # seconds
         start = time.time()
         while True:
-            new_b64 = self.__get_image_base64()
+            new_b64 = self._get_image_base64()
             time.sleep(0.05)
             if new_b64 != old_b64:
                 return new_b64
@@ -62,7 +62,7 @@ class Pom:
             raise ValueError("image_locator is None")
 
         self.page.wait_for_load_state("networkidle")
-        old_b64 = self.__get_image_base64()
+        old_b64 = self._get_image_base64()
         self.reload_btn_locator.click()
 
         new_b64_bytes = b""
@@ -240,3 +240,66 @@ class kgmobilians(Pom):
 
         self.image_locator = self.page.get_by_alt_text("보안문자 숫자 6자리").filter(visible=True)
         self.reload_btn_locator = self.page.locator("input.reLoad").filter(visible=True)
+
+
+class kcb(Pom):
+    gate_url = "https://www.onepass.go.kr/membership/find/id"
+
+    @override
+    def prepare(self):
+
+        with self.context.expect_page() as page_info:
+            self.page.get_by_role("link", name="휴대폰 인증").click()
+            self.page = page_info.value
+
+        tc_input_element = self.page.locator("input[name='tc']").element_handle()
+        self.page.evaluate(
+            "(input) => { input.value = 'kcb.oknm.online.pass.popup.sms.cmd.mno.PS02_SmsMno011Cmd'; }",
+            tc_input_element,
+        )
+
+        tel_input_element = self.page.locator("input[name='mbl_tel_cmm_cd']").element_handle()
+        self.page.evaluate("(input) => { input.value = '02'; }", tel_input_element)
+        form_element = self.page.locator("#ct > form").element_handle()
+
+        self.page.evaluate("(form) => { form.submit(); }", form_element)
+
+        self.image_locator = self.page.locator("#botDetectCaptcha_CaptchaImage")
+        self.reload_btn_locator = self.page.locator("#botDetectCaptcha_ReloadLink")
+
+    @override
+    def save_captcha(self, path: str):
+        if self.reload_btn_locator is None:
+            raise ValueError("reload_btn_locator is None")
+        if self.image_locator is None:
+            raise ValueError("image_locator is None")
+
+        self.page.wait_for_load_state("networkidle")
+        old_b64 = self._get_image_base64()
+        self.reload_btn_locator.click()
+
+        new_b64_bytes = b""
+        while len(new_b64_bytes) == 0:
+            timeout = 5  # seconds
+            start = time.time()
+            while True:
+                new_b64 = self._get_image_base64()
+                self.reload_btn_locator.click()
+                time.sleep(0.05)
+                if new_b64 != old_b64:
+                    break
+
+                if time.time() - start > timeout:
+                    raise TimeoutError("Image base64 did not change after reload")
+
+            new_b64_bytes = base64.b64decode(new_b64.split(",")[1])
+
+        image = Image.open(BytesIO(new_b64_bytes))
+        if image.mode in ("RGBA", "LA"):
+            background = Image.new("RGB", image.size, (255, 255, 255))
+            background.paste(image, mask=image.split()[-1])
+            image = background
+        else:
+            image = image.convert("RGB")
+
+        image.save(path)
