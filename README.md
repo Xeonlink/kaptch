@@ -1,6 +1,34 @@
-# Kaptch - 한국 모바일인증 캡챠 자동 인식 파이프라인
 
-한국 모바일인증 서비스의 캡챠를 자동으로 인식하는 머신러닝 파이프라인입니다. CRNN(Convolutional Recurrent Neural Network) 모델을 사용하여 캡챠 이미지의 숫자를 정확하게 인식합니다.
+<br/>
+<div align="center">
+  <img src="publish/readme/title.png" alt="title" style="width: 250px" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=24&pause=1000&color=667EEA&center=true&vCenter=true&width=600&lines=Captcha+Recognition+AI+Model+Generator" alt="Kaptch Subtitle" />
+</div>
+<br/>
+
+Kaptch는 한국 모바일인증 서비스의 캡챠를 자동으로 인식하는 AI모델을 만들기 위한 CLI도구 입니다. Kaptcha는 데이터를 수집에서 모델을 만드는 과정까지 필요한 명령어를 CLI에서 조작할 수 있도록 합니다.
+
+## 🔧 기술 스택
+
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+![TorchVision](https://img.shields.io/badge/TorchVision-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+![Typer](https://img.shields.io/badge/Typer-0B7EC8?style=for-the-badge&logo=fastapi&logoColor=white)
+![Rich](https://img.shields.io/badge/Rich-009639?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
+![Pillow](https://img.shields.io/badge/Pillow-306998?style=for-the-badge&logo=python&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)
+![ONNX](https://img.shields.io/badge/ONNX-005CED?style=for-the-badge&logo=onnx&logoColor=white)
+![ONNXRuntime](https://img.shields.io/badge/ONNX_Runtime-005CED?style=for-the-badge&logo=onnx&logoColor=white)
+![Yaspin](https://img.shields.io/badge/Yaspin-009639?style=for-the-badge&logo=python&logoColor=white)
+![Pyfiglet](https://img.shields.io/badge/Pyfiglet-306998?style=for-the-badge&logo=python&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
 
 ## 🚀 주요 기능
 
@@ -10,157 +38,133 @@
 - **체크포인트 관리**: 훈련 과정의 체크포인트 저장 및 관리
 - **ONNX 변환**: 추론 최적화를 위한 ONNX 모델 변환
 
-## 📋 지원하는 인증업체
-
-- **NHN KCP**: NHN KCP 모바일인증
-- **NICE 평가정보**: NICE 본인확인
-- **SCI 평가정보**: SCI 본인확인
-- **KMCERT**: KMCERT 본인확인
-
-## 🛠️ 설치 및 실행
-
-### 1. 의존성 설치
-```bash
-pip install -r requirements.txt
-```
-
-### 2. 기본 사용법
-```bash
-# 메인 CLI 실행
-python main.py --help
-
-# 데이터셋 생성
-python main.py datasets create sci
-
-# 캡챠 수집
-python main.py datasets crawl sci
-
-# 라벨링 서버 시작
-python main.py datasets label
-
-# 모델 훈련
-python main.py train sci
-
-# 체크포인트 확인
-python main.py checkpoints list sci
-
-# ONNX 변환
-python main.py misc torch2onnx sci ep4.pkl
-```
-
-## 📖 상세 사용법
-
-### 데이터셋 관리
-
-#### 데이터셋 생성
-```bash
-python main.py datasets create <데이터셋명>
-```
-새로운 데이터셋을 생성합니다. 하이픈은 자동으로 언더스코어로 변환됩니다.
-
-#### 캡챠 수집
-```bash
-python main.py datasets crawl <데이터셋명> [--goal 1100] [--headless]
-```
-웹사이트에서 캡챠 이미지를 자동으로 수집합니다.
-
-#### 라벨링
-```bash
-python main.py datasets label [--port 3000]
-```
-웹 브라우저를 통해 캡챠 이미지에 라벨을 붙일 수 있는 서버를 시작합니다.
-
-### 모델 훈련
-
-#### 기본 훈련
-```bash
-python main.py train <데이터셋명>
-```
-
-#### 고급 훈련 옵션
-```bash
-python main.py train <데이터셋명> \
-  --epochs 100 \
-  --batch-size 64 \
-  --learning-rate 1e-3 \
-  --patience 10 \
-  --train-size 2000 \
-  --test-size 200
-```
-
-### 체크포인트 관리
-
-#### 체크포인트 목록 확인
-```bash
-python main.py checkpoints list <데이터셋명>
-python main.py checkpoints list all  # 모든 데이터셋
-```
-
-#### 체크포인트 삭제
-```bash
-python main.py checkpoints remove <데이터셋명>
-```
-
-### 유틸리티
-
-#### ONNX 변환
-```bash
-python main.py misc torch2onnx <데이터셋명> <체크포인트명> [--output captcha.onnx]
-```
-
-## 🏗️ 프로젝트 구조
-
-```
-kaptch/
-├── main.py                 # 메인 CLI 진입점
-├── src/
-│   ├── datasets/          # 데이터셋 관리
-│   │   ├── __init__.py   # 데이터셋 CLI
-│   │   ├── label.py      # 웹 라벨링 서버
-│   │   └── pom.py        # 페이지 오브젝트 모델
-│   ├── train/            # 모델 훈련
-│   │   ├── __init__.py   # 훈련 CLI
-│   │   ├── model.py      # CRNN 모델 정의
-│   │   ├── dataset.py    # 데이터셋 클래스
-│   │   └── checkpoint.py # 체크포인트 관리
-│   ├── checkpoints.py    # 체크포인트 CLI
-│   ├── misc.py          # 기타 유틸리티
-│   └── constants.py     # 상수 정의
-├── dataset/              # 데이터셋 저장소
-├── checkpoints/          # 체크포인트 저장소
-└── captcha.onnx         # 변환된 ONNX 모델
-```
-
-## 🔧 기술 스택
-
-- **Python 3.12+**: 메인 프로그래밍 언어
-- **PyTorch**: 딥러닝 프레임워크
-- **Typer**: CLI 프레임워크
-- **Rich**: 터미널 출력 라이브러리
-- **Playwright**: 웹 자동화
-- **Flask**: 웹 라벨링 서버
-- **OpenCV**: 이미지 처리
-- **ONNX**: 모델 변환 및 추론
 
 ## 📊 모델 아키텍처
 
-- **CNN**: 이미지 특징 추출 (Depthwise Separable Convolution 사용)
+- **CNN**: 이미지 특징 추출
 - **RNN**: 시퀀스 모델링 (Bidirectional GRU)
 - **CTC Loss**: 가변 길이 출력 처리
 - **Early Stopping**: 과적합 방지
 - **Learning Rate Scheduling**: 최적화 성능 향상
 
-## ⚠️ 주의사항
+## 📖 사용방법
 
-1. **법적 고려사항**: 웹 크롤링 시 해당 웹사이트의 이용약관을 준수하세요.
-2. **데이터 보안**: 수집된 데이터의 안전한 관리가 필요합니다.
-3. **리소스 관리**: GPU 메모리 사용량을 모니터링하세요.
-4. **백업**: 중요한 체크포인트는 정기적으로 백업하세요.
+### 🚀 시작하기
 
-## 📄 라이선스
+```bash
+# 프로젝트 실행
+python main.py
 
-이 프로젝트는 교육 및 연구 목적으로 제작되었습니다. 상업적 사용 시 관련 법규를 준수하시기 바랍니다.
+# 도움말 보기
+python main.py --help
+```
 
-## 📞 문의
+### 📊 데이터셋 관리
 
-프로젝트에 대한 문의사항이나 버그 리포트는 GitHub Issues를 통해 제출해 주세요.
+```bash
+# 데이터셋 목록 보기
+python main.py datasets list
+python main.py datasets ls
+
+# 새 데이터셋 생성
+python main.py datasets create <데이터셋명>
+python main.py datasets add <데이터셋명>
+
+# 웹에서 캡챠 이미지 수집
+python main.py datasets crawl <데이터셋명> --goal 1100 --debug
+
+# 웹 기반 라벨링 서버 시작
+python main.py datasets label --host localhost --port 3000
+
+# 데이터셋 삭제
+python main.py datasets remove <데이터셋명>
+python main.py datasets rm <데이터셋명>
+```
+
+#### 데이터셋 목록 보기
+<img src="publish/readme/datasets_list.png" alt="데이터셋 목록" style="max-width: 100%; width: 500px; height: auto;">
+
+#### 새 데이터셋 생성
+<img src="publish/readme/datasets_create_test.png" alt="데이터셋 생성" style="max-width: 100%; width: 500px; height: auto;">
+
+#### 데이터셋 삭제
+<img src="publish/readme/datasets_remove_sci.png" alt="데이터셋 삭제" style="max-width: 100%; width: 500px; height: auto;">
+
+### 🧠 모델 훈련
+
+```bash
+# CRNN 모델 훈련
+python main.py train <데이터셋명>
+
+# 훈련 옵션 설정
+python main.py train <데이터셋명> \
+  --batch-size 32 \
+  --epochs 50 \
+  --learning-rate 2e-3 \
+  --patience 5 \
+  --train-size 1000 \
+  --test-size 100 \
+  --seed 42 \
+  --warmup-epochs 5
+```
+
+### 💾 체크포인트 관리
+
+```bash
+# 체크포인트 목록 보기
+python main.py checkpoints list <데이터셋명>
+python main.py checkpoints ls <데이터셋명>
+
+# 모든 데이터셋의 체크포인트 보기
+python main.py checkpoints list all
+
+# 체크포인트 삭제
+python main.py checkpoints remove <데이터셋명>
+python main.py checkpoints rm <데이터셋명>
+```
+
+#### 체크포인트 목록 보기
+<img src="publish/readme/checkpoints_list_--name_dream.png" alt="체크포인트 목록" style="max-width: 100%; width: 400px; height: auto;">
+
+#### 체크포인트 삭제
+<img src="publish/readme/checkpoints_rm_dream.png" alt="체크포인트 삭제" style="max-width: 100%; width: 500px; height: auto;">
+
+### 🔧 기타 유틸리티
+
+```bash
+# PyTorch 모델을 ONNX로 변환
+python main.py misc torch2onnx <데이터셋명> <체크포인트명> --output captcha.onnx
+
+# ONNX 모델 검증 (숨겨진 명령어)
+python main.py misc validate <데이터셋명> <체크포인트명> --image-path <이미지경로>
+```
+
+#### PyTorch 모델을 ONNX로 변환
+<img src="publish/readme/checkpoints_misc_torch2onnx_dream_ep15.pkl.png" alt="ONNX 변환" style="max-width: 100%; width: 500px; height: auto;">
+
+### 📝 사용 예시
+
+```bash
+# 1. 데이터셋 생성 및 수집
+python main.py datasets create sci
+python main.py datasets crawl sci --goal 1000
+
+# 2. 웹 라벨링으로 데이터 라벨링
+python main.py datasets label
+# 브라우저에서 http://localhost:3000 접속
+
+# 3. 모델 훈련
+python main.py train sci --epochs 100 --batch-size 64
+
+# 4. 체크포인트 확인
+python main.py checkpoints list sci
+
+# 5. ONNX 변환
+python main.py misc torch2onnx sci ep10.pkl my-model.onnx
+```
+
+
+<div align="center">
+  <a href="/publish/comment.md">개발자 코맨트</a><br/>
+  아무거나 규탄한다! 이것저것 보장하라!
+</div>
