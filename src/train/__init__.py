@@ -1,18 +1,26 @@
-import os
 import csv
-import typer
-import torch
+import os
 import shutil
+
+import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, random_split
-from src.train.dataset import CaptchaDataset
-from src.train.model import CRNNNet
+import typer
 from rich.console import Console
 from rich.panel import Panel
-from src.train.checkpoint import Checkpoint
-from src.constants import CHECKPOINT_ROOT, DATASET_ROOT, DATA_CSV
+from torch.utils.data import DataLoader, random_split
 from typing_extensions import Annotated
+
+from src.constants import (
+    CHECKPOINT_ROOT,
+    CTC_BLANK_INDEX,
+    DATA_CSV,
+    DATASET_ROOT,
+    ENCODABLE_CHARS,
+)
+from src.train.checkpoint import Checkpoint
+from src.train.dataset import CaptchaDataset
+from src.train.model import CRNNNet
 
 console = Console()
 app = typer.Typer(help="모델 훈련 및 평가 도구", rich_markup_mode="rich")
@@ -39,7 +47,8 @@ def encode_labels_ctc(labels: list[str]) -> tuple[torch.Tensor, torch.Tensor]:
         targets: (sum_label_len,) 모든 라벨을 1D로 이어붙인 int tensor
         lengths: (batch,) 각 라벨의 길이
     """
-    targets = [int(ch) for label in labels for ch in label]
+
+    targets = [ENCODABLE_CHARS.index(ch) for label in labels for ch in label]
     lengths = [len(label) for label in labels]
     return torch.tensor(targets, dtype=torch.long), torch.tensor(lengths, dtype=torch.long)
 
@@ -52,7 +61,7 @@ def ctc_greedy_decode(logits: torch.Tensor) -> list[list[int]]:
         out = []
         prev = -1
         for p in seq:
-            if p != prev and p != 10:  # 10: blank
+            if p != prev and p != CTC_BLANK_INDEX:
                 out.append(p)
             prev = p
         results.append(out)
@@ -175,8 +184,8 @@ def train(
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=2)
 
     # model, loss function, optimizer
-    model = CRNNNet(num_classes=11).to(device)
-    criterion = nn.CTCLoss(blank=10, zero_infinity=True)
+    model = CRNNNet(num_classes=len(ENCODABLE_CHARS) + 1).to(device)
+    criterion = nn.CTCLoss(blank=CTC_BLANK_INDEX, zero_infinity=True)
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 
     # learning rate scheduler

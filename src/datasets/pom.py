@@ -1,10 +1,11 @@
-from playwright.sync_api import BrowserContext, Page, Locator
-from typing import override
-import time
-from pathlib import Path
 import base64
-from PIL import Image
+import time
 from io import BytesIO
+from pathlib import Path
+from typing import override
+
+from PIL import Image
+from playwright.sync_api import BrowserContext, Locator, Page
 
 
 class Pom:
@@ -108,6 +109,39 @@ class nice(Pom):
 
         with self.context.expect_page() as page_info:
             self.page.get_by_role("button", name="휴대폰").click()
+            self.page = page_info.value
+
+        self.page.locator("#telcomKT").click()
+        self.page.locator("button[value='SMS']").click()
+        self.page.locator("#mobileCertAgree").check()
+        self.page.locator("#btnMobileCertStart").click()
+        name_locator = self.page.locator("#userName")
+        name_locator.fill("홍길동")
+        name_locator.press("Enter")
+        self.page.locator("#btnSubmit").click()
+        num1_locator = self.page.locator("#myNum1")
+        num1_locator.fill("821203")
+        num1_locator.press("Enter")
+        num2_locator = self.page.locator("#myNum2")
+        num2_locator.fill("1")
+        num2_locator.press("Enter")
+        mobile_no_locator = self.page.locator("#mobileNo")
+        mobile_no_locator.fill("01012341234")
+        mobile_no_locator.press("Enter")
+
+        self.image_locator = self.page.locator("#simpleCaptchaImg")
+        self.reload_btn_locator = self.page.locator("#btnSimpleCaptchaReload")
+
+
+class nice_en(Pom):
+    gate_url = "https://www.goeyi.kr/goeyi/lo/login/loginTotalPage.do"
+
+    @override
+    def prepare(self):
+        self.page.get_by_text("일반사용자(비회원) 로그인").click()
+
+        with self.context.expect_page() as page_info:
+            self.page.get_by_alt_text("휴대폰 로그인").click()
             self.page = page_info.value
 
         self.page.locator("#telcomKT").click()

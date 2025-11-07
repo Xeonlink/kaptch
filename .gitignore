@@ -11,10 +11,10 @@ wheels/
 
 # extra 
 .pytest_cache/
-/dataset/
 /logs/
-/checkpoints/
 /demo/
 .DS_Store
 .claude/
 /.output
+data
+.vscode

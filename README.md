@@ -1,7 +1,7 @@
 
 <br/>
 <div align="center">
-  <img src="publish/readme/title.png" alt="title" style="width: 250px" />
+  <img src="docs/readme/title.png" alt="title" style="width: 250px" />
   <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=24&pause=1000&color=667EEA&center=true&vCenter=true&width=600&lines=Captcha+Recognition+AI+Model+Generator" alt="Kaptch Subtitle" />
 </div>
 <br/>
@@ -82,13 +82,13 @@ python main.py datasets rm <데이터셋명>
 ```
 
 #### 데이터셋 목록 보기
-<img src="publish/readme/datasets_list.png" alt="데이터셋 목록" style="max-width: 100%; width: 500px; height: auto;">
+<img src="docs/readme/datasets_list.png" alt="데이터셋 목록" style="max-width: 100%; width: 500px; height: auto;">
 
 #### 새 데이터셋 생성
-<img src="publish/readme/datasets_create_test.png" alt="데이터셋 생성" style="max-width: 100%; width: 500px; height: auto;">
+<img src="docs/readme/datasets_create_test.png" alt="데이터셋 생성" style="max-width: 100%; width: 500px; height: auto;">
 
 #### 데이터셋 삭제
-<img src="publish/readme/datasets_remove_sci.png" alt="데이터셋 삭제" style="max-width: 100%; width: 500px; height: auto;">
+<img src="docs/readme/datasets_remove_sci.png" alt="데이터셋 삭제" style="max-width: 100%; width: 500px; height: auto;">
 
 ### 🧠 모델 훈련
 
@@ -124,10 +124,10 @@ python main.py checkpoints rm <데이터셋명>
 ```
 
 #### 체크포인트 목록 보기
-<img src="publish/readme/checkpoints_list_--name_dream.png" alt="체크포인트 목록" style="max-width: 100%; width: 400px; height: auto;">
+<img src="docs/readme/checkpoints_list_--name_dream.png" alt="체크포인트 목록" style="max-width: 100%; width: 400px; height: auto;">
 
 #### 체크포인트 삭제
-<img src="publish/readme/checkpoints_rm_dream.png" alt="체크포인트 삭제" style="max-width: 100%; width: 500px; height: auto;">
+<img src="docs/readme/checkpoints_rm_dream.png" alt="체크포인트 삭제" style="max-width: 100%; width: 500px; height: auto;">
 
 ### 🔧 기타 유틸리티
 
@@ -140,7 +140,7 @@ python main.py misc validate <데이터셋명> <체크포인트명> --image-path
 ```
 
 #### PyTorch 모델을 ONNX로 변환
-<img src="publish/readme/checkpoints_misc_torch2onnx_dream_ep15.pkl.png" alt="ONNX 변환" style="max-width: 100%; width: 500px; height: auto;">
+<img src="docs/readme/checkpoints_misc_torch2onnx_dream_ep15.pkl.png" alt="ONNX 변환" style="max-width: 100%; width: 500px; height: auto;">
 
 ### 📝 사용 예시
 
@@ -165,6 +165,6 @@ python main.py misc torch2onnx sci ep10.pkl my-model.onnx
 
 
 <div align="center">
-  <a href="/publish/comment.md">개발자 코맨트</a><br/>
+  <a href="/docs/comment.md">개발자 코맨트</a><br/>
   아무거나 규탄한다! 이것저것 보장하라!
 </div>
