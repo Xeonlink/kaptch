@@ -17,6 +17,7 @@ from src.constants import (
     DATA_CSV,
     DATASET_ROOT,
     ENCODABLE_CHARS,
+    RNN_HIDDEN,
 )
 from src.train.checkpoint import Checkpoint
 from src.train.dataset import CaptchaDataset
@@ -78,7 +79,7 @@ def evaluate_ctc(model: CRNNNet, loader: DataLoader, device: torch.device) -> fl
             imgs = imgs.to(device)
             logits = model.forward(imgs)
             preds = ctc_greedy_decode(logits)
-            labels_num = [[int(ch) for ch in label] for label in labels]
+            labels_num = [[ENCODABLE_CHARS.index(ch) for ch in label] for label in labels]
             for p, t in zip(preds, labels_num):
                 if p == t:
                     correct += 1
@@ -184,7 +185,7 @@ def train(
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=2)
 
     # model, loss function, optimizer
-    model = CRNNNet(num_classes=len(ENCODABLE_CHARS) + 1).to(device)
+    model = CRNNNet(num_classes=len(ENCODABLE_CHARS) + 1, rnn_hidden=RNN_HIDDEN).to(device)
     criterion = nn.CTCLoss(blank=CTC_BLANK_INDEX, zero_infinity=True)
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 

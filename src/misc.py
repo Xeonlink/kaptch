@@ -1,16 +1,26 @@
-import cv2
-import typer
-import torch
-from src.train.model import CRNNNet
-from src.constants import BLANK_INDEX, CHECKPOINT_ROOT, DATASET_ROOT, DATA_CSV
 import csv
-import onnxruntime as ort
-import numpy as np
-from rich.console import Console
 from pathlib import Path
-from src.train.checkpoint import Checkpoint
+
+import cv2
+import numpy as np
+import onnxruntime as ort
+import torch
+import typer
+from rich.console import Console
 from rich.panel import Panel
 from typing_extensions import Annotated
+
+from src.constants import (
+    BLANK_INDEX,
+    CHECKPOINT_ROOT,
+    DATA_CSV,
+    DATASET_ROOT,
+    ENCODABLE_CHARS,
+    GENERAL_OUTPUT_ROOT,
+    RNN_HIDDEN,
+)
+from src.train.checkpoint import Checkpoint
+from src.train.model import CRNNNet
 
 console = Console()
 app = typer.Typer(help="기타 유틸리티 도구", rich_markup_mode="rich")
@@ -72,9 +82,10 @@ def torch2onnx(
 
     변환된 ONNX 파일은 추론 시 더 빠른 속도를 제공합니다.
     """
+    output_path = GENERAL_OUTPUT_ROOT / output
     checkpoint_path = Path(CHECKPOINT_ROOT / name / checkpoint_name)
     checkpoint = Checkpoint.load(checkpoint_path)
-    model = CRNNNet()
+    model = CRNNNet(num_classes=len(ENCODABLE_CHARS) + 1, rnn_hidden=RNN_HIDDEN)
     model.load_state_dict(checkpoint.state_dict)
     model.eval()
     script_module = torch.jit.script(model)
@@ -93,7 +104,7 @@ def torch2onnx(
             f"Parameter Count: [green]{sum(p.numel() for p in script_module.parameters()) / 1_000_000:.2f} M[/]",
             f"Input Dimensions: [green]{mock_input.shape}[/]",
             f"Input Data Type: [green]{mock_input.dtype}[/]",
-            f"Output: [green]{output}[/]",
+            f"Output: [green]{output_path}[/]",
         ]
     )
     panel = Panel(
@@ -109,10 +120,11 @@ def torch2onnx(
         console.print("Conversion cancelled.", style="red")
         return
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     torch.onnx.export(
         model=script_module,
         args=(mock_input,),
-        f=output,
+        f=output_path,
         input_names=["x"],
         output_names=["y"],
         opset_version=optset_version,

@@ -1,6 +1,6 @@
 def lazy(fullname: str):
-    import sys
     import importlib.util
+    import sys
 
     try:
         return sys.modules[fullname]

@@ -1,9 +1,11 @@
 import csv
+from pathlib import Path
+
 import cv2
 import torch
-from pathlib import Path
 from torch.utils.data import Dataset
-from src.constants import DATA_CSV
+
+from src.constants import DATA_CSV, ENCODABLE_CHARS
 
 
 class CaptchaDataset(Dataset):
@@ -48,8 +50,8 @@ class CaptchaDataset(Dataset):
 
         # 라벨 유효성검사
         label = raw_label
-        if not label.isdigit():
-            raise ValueError(f"Invalid label: {label} (must be digit string), {img_path}")
+        if any(ch not in ENCODABLE_CHARS for ch in label):
+            raise ValueError(f"Invalid label: {label} (must be consist of ENCODABLE_CHARS), {img_path}")
 
         # 텐서로 변환 및 유효성검사
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
