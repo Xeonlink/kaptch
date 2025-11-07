@@ -1,8 +1,10 @@
-from flask import Flask, request, send_from_directory, jsonify
 import csv
-import os
-from src.constants import DATA_CSV
+from itertools import islice
+from pathlib import Path
 
+from flask import Flask, jsonify, request, send_from_directory
+
+from src.constants import DATA_CSV, DATASET_ROOT
 
 app = Flask(__name__)
 
@@ -14,7 +16,7 @@ def root():
     Returns:
         Response: index.html 파일
     """
-    home_dir = os.path.join(os.path.dirname(__file__), "label")
+    home_dir = Path(__file__).parent / "label"
     return send_from_directory(home_dir, "index.html")
 
 
@@ -28,14 +30,14 @@ def home(name):
     Returns:
         Response: 요청된 파일 또는 404 에러
     """
-    home_dir = os.path.join(os.path.dirname(__file__), "label")
+    home_dir = Path(__file__).parent / "label"
     return send_from_directory(home_dir, name)
 
 
 @app.route("/api/datasets")
 def get_datasets():
-    datasets = os.listdir("dataset")
-    datasets = list(filter(lambda x: os.path.isdir(os.path.join("dataset", x)), datasets))
+    datasets = DATASET_ROOT.iterdir()
+    datasets = list(x.name for x in datasets if x.is_dir())
     return jsonify({"datasets": datasets})
 
 
@@ -50,8 +52,8 @@ def get_dataset(dataset: str):
         dict: 데이터셋 정보를 포함한 JSON 응답
     """
 
-    csv_path = os.path.join("dataset", dataset, DATA_CSV)
-    if not os.path.exists(csv_path):
+    csv_path = DATASET_ROOT / dataset / DATA_CSV
+    if not csv_path.exists():
         return jsonify({"error": "Dataset not found"}), 404
 
     unlabeled_indices: list[int] = []
@@ -79,20 +81,17 @@ def get_images(dataset: str, index: int):
     Returns:
         Response: 이미지 파일 또는 에러 응답
     """
-    csv_path = os.path.join("dataset", dataset, DATA_CSV)
-    if not os.path.exists(csv_path):
+    csv_path = DATASET_ROOT / dataset / DATA_CSV
+    if not csv_path.exists():
         return jsonify({"error": "Dataset not found"}), 404
 
     with open(csv_path, "r", encoding="utf-8", newline="") as f:
         reader = csv.reader(f)
         try:
             # index번째 행까지 건너뛰기
-            for _ in range(index):
-                next(reader, None)
+            row = next(islice(reader, index, index + 1))
 
-            row = next(reader)
-
-            return send_from_directory(os.path.join(os.getcwd(), "dataset", dataset), row[0])
+            return send_from_directory(Path.cwd() / DATASET_ROOT / dataset, row[0])
         except StopIteration:
             return jsonify({"error": "Index not found"}), 404
 
@@ -110,8 +109,8 @@ def post_labels(dataset: str, index: int):
     """
     data = request.get_json()
     label = data.get("label", "")
-    csv_path = os.path.join("dataset", dataset, DATA_CSV)
-    if not os.path.exists(csv_path):
+    csv_path = DATASET_ROOT / dataset / DATA_CSV
+    if not csv_path.exists():
         return jsonify({"error": "Dataset not found"}), 404
 
     # 전체 파일을 읽어서 메모리에 저장
