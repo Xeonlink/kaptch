@@ -1,0 +1,98 @@
+# icon reference: https://gist.github.com/rxaviers/7360908
+
+## Issue Labels
+
+### ⏱️ status and progress
+- name: "🌱 stat:new"
+  color: "70b322"
+  description: "Issue not yet reviewed by maintainer"
+
+- name: "🤝 stat:resolving"
+  color: "aaaaaa"
+  description: "Lack of information to verify the issue. Cannot reproduce the issue"
+
+- name: "⏳ stat:resolved"
+  color: "935026"
+  description: "Successfully reproduced the issue."
+
+### 📌 type
+- name: "❌ type:bug"
+  color: "eb5637"
+  description: "Report of unexpected errors or incorrect behavior"
+
+- name: "💀 type:vulnerability"
+  color: "f0f9fe"
+  description: "Security-related reports, CVE alerts, and security-related dependency alerts"
+
+- name: "✨ type:feature"
+  color: "fbdd3a"
+  description: "Request for a new feature"
+
+- name: "💡 type:qeustion"
+  color: "ecebeb"
+  description: "Questions about how to use a feature or technical inquiries"
+
+- name: "📋 type:documentation"
+  color: "2d7ba3"
+  description: "Requests for documentation-related work (mod, add etc.), typo, documentation incorrect"
+
+- name: "🧹 type:chore"
+  color: "889eab"
+  description: "Maintenance tasks such as code cleanup and dependency updates not related to security"
+
+### 📝 priority
+- name: "🚨 priority:critical"
+  color: "f34b3a"
+  description: "Critical bugs and issues that must be resolved immediately"
+
+- name: "🔥 priority:high"
+  color: "f59e0b"
+  description: "High priority bugs and issues that should be resolved as soon as possible"
+
+- name: "⚠️ priority:medium"
+  color: "f97316"
+  description: "Medium priority bugs and issues that should be resolved as soon as possible"
+
+- name: "🍃 priority:low"
+  color: "22c55e"
+  description: "Low priority bugs and issues that can be resolved later"
+
+- name: "🚧 priority:no-plan"
+  color: "e4d826"
+  description: "No plan to proceed with the issue"
+
+### 🙃 misc
+- name: "🔁 misc:duplicate"
+  color: "505255"
+  description: "When the content overlaps with another existing issue"
+
+## Pull Request Labels
+
+### 🧹 type
+- name: "🧹 pr:chore"
+  color: "889eab"
+  description: "Maintenance tasks such as code cleanup and dependency updates not related to security"
+
+- name: "🧼 pr:refactor"
+  color: "a1b5ae"
+  description: "Code cleanup and refactoring"
+
+- name: "🪄 pr:setting"
+  color: "c5b5e3"
+  description: "Setting changes"
+
+- name: "🎫 pr:test"
+  color: "ffd580"
+  description: "Test code changes"
+
+- name: "✨ pr:feature"
+  color: "7dd3fc"
+  description: "Deployment changes"
+
+- name: "📋 pr:docs"
+  color: "2d7ba3"
+  description: "Documentation changes"
+
+- name: "🩹 pr:fix"
+  color: "eb5637"
+  description: "Bug fixes"
